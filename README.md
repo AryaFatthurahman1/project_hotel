@@ -1,32 +1,25 @@
-# project_hotel
+# THE EMERALD IMPERIAL - Hotel Stay Luxury App
 
-A new Flutter project.
+A Ultra-Premium Hotel Booking and Management System built with Flutter and PHP.
 
-## Getting Started
+## Features
+- **Ultra-Luxury UI**: Emerald & Gold theme with cinematic animations.
+- **Advanced Dashboard**: Real-time sales statistics and travel notes.
+- **Smart Login**: Easy access with secure token-based authentication.
+- **Dual Connection**: Auto-switching between localhost and production hosting.
+- **Complete API**: Full-featured backend for users, hotels, articles, and bookings.
 
-This project is a starting point for a Flutter application.
+## Production Credentials
+- **URL**: [https://arya.bersama.cloud/](https://arya.bersama.cloud/)
+- **DB Name**: `bere9277_db_arya`
+- **DB User**: `bere9277_user_arya`
+- **DB Pass**: `aryafatturahman123`
 
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
----
+## Login Shortcuts
+- **Admin**: `arya` / `123`
+- **Personal**: `aryafatthurahman4@gmail.com` / `arya123`
 
 ## Prepared by
-- Name: muhammad arya fatthurahman
-- NIM: 2023230006
-- Program: Teknologi Informasi
-
-## UAS / Demo checklist ✅
-- Login (API) — token disimpan di SharedPreferences
-- Menampilkan list hotels (image network)
-- Artikel tampil di Container
-- Snackbar/message saat aksi (booking/button)
-- 5 menu di drawer (Home, Articles, Bookings, Profile, Logout)
-
-
+**Muhammad Arya Fatthurahman**
+2023230006
+UAS Mobile Computing
