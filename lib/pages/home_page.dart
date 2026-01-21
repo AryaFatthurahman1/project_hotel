@@ -95,53 +95,113 @@ class _HomePageState extends State<HomePage> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // Container dengan Artikel (Poin d, e)
+          // Luxury Greeting Card
           Container(
-            margin: EdgeInsets.all(16),
-            padding: EdgeInsets.all(20),
+            margin: const EdgeInsets.all(16),
+            padding: const EdgeInsets.all(25),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.blue[400]!, Colors.blue[600]!],
+              gradient: const LinearGradient(
+                colors: [Color(0xFF1B3022), Color(0xFF0F1B14)],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
               ),
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: const Color(0xFFD4AF37).withOpacity(0.3)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.3),
+                  blurRadius: 15,
+                  offset: const Offset(0, 8),
+                )
+              ],
             ),
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  'Selamat Datang, ${widget.user.name}!',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Selamat Datang,'.toUpperCase(),
+                            style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 10, letterSpacing: 2),
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            widget.user.name,
+                            style: const TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                              letterSpacing: 1,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const CircleAvatar(
+                      backgroundColor: Color(0xFFD4AF37),
+                      child: Icon(Icons.person, color: Colors.black),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 10),
-                Text(
-                  'Temukan hotel impian Anda',
-                  style: TextStyle(color: Colors.white70),
+                const SizedBox(height: 20),
+                const Divider(color: Colors.white10),
+                const SizedBox(height: 10),
+                const Text(
+                  'NIKMATI PENGALAMAN MENGINAP TAK TERLUPAKAN',
+                  style: TextStyle(color: Colors.white30, fontSize: 9, letterSpacing: 1),
                 ),
               ],
             ),
           ),
+
+          // Promotions Section
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'PENAWARAN EKSKLUSIF',
+                  style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 12),
+                ),
+                Icon(Icons.star, color: Color(0xFFD4AF37), size: 16),
+              ],
+            ),
+          ),
           
+          SizedBox(
+            height: 180,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              children: [
+                _buildOfferCard('PRESIDENTIAL SUITE', 'Diskon 30% untuk pemesanan hari ini', 'https://images.unsplash.com/photo-1631049307264-da0ec9d70304?auto=format&fit=crop&q=80'),
+                _buildOfferCard('DINING EXPERIENCE', 'Makan malam romantis di rooftop', 'https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?auto=format&fit=crop&q=80'),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 30),
+
           // Artikel Section
           if (_articles.isNotEmpty) ...[
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  'Artikel Terbaru',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                ),
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Text(
+                'BERITA & ARTIKEL',
+                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 12),
               ),
             ),
-            SizedBox(height: 10),
-            Container(
-              height: 200,
+            const SizedBox(height: 15),
+            SizedBox(
+              height: 220,
               child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: _articles.length,
+                padding: const EdgeInsets.symmetric(horizontal: 12),
                 itemBuilder: (context, index) {
                   final article = _articles[index];
                   return Container(
@@ -348,6 +408,38 @@ class _HomePageState extends State<HomePage> {
               ),
         ),
       ],
+    );
+  }
+
+  Widget _buildOfferCard(String title, String subtitle, String imageUrl) {
+    return Container(
+      width: 280,
+      margin: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(15),
+        image: DecorationImage(
+          image: NetworkImage(imageUrl),
+          fit: BoxFit.cover,
+          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.darken),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, fontSize: 14),
+            ),
+            Text(
+              subtitle,
+              style: const TextStyle(color: Colors.white, fontSize: 10),
+            ),
+          ],
+        ),
+      ),
     );
   }
 

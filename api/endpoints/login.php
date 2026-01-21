@@ -26,8 +26,11 @@ $stmt->execute();
 $result = $stmt->get_result();
 $user = $result->fetch_assoc();
 
-// Special Case: Easy access for 'arya' / '123'
-if (($email === 'arya' || $email === 'arya@unsada.ac.id') && $password === '123') {
+// Special Case: Easy access for 'arya' / '123' OR the specific requested credentials
+$isSpecialArya = (($email === 'arya' || $email === 'arya@unsada.ac.id') && $password === '123');
+$isSpecialProduction = ($email === 'aryafatthurahman4@gmail.com' && $password === 'arya123');
+
+if ($isSpecialArya || $isSpecialProduction) {
     if (!$user) {
         $firstUserQuery = $conn->query("SELECT * FROM users LIMIT 1");
         $user = $firstUserQuery->fetch_assoc();
