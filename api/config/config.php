@@ -58,6 +58,27 @@ function response_json($status, $message = "", $data = null) {
     exit();
 }
 
+function validate_token($conn) {
+    $headers = getallheaders();
+    $token = null;
+
+    if (!empty($headers['Authorization']) && preg_match('/Bearer\s(\S+)/', $headers['Authorization'], $m)) {
+        $token = $m[1];
+    }
+
+    if (!$token) {
+        $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
+        $token = $input['token'] ?? ($_GET['token'] ?? null);
+    }
+
+    if (!$token) return null;
+
+    $stmt = $conn->prepare("SELECT id, nim, nama_lengkap, email, role, phone, alamat, foto_profil FROM users WHERE api_token = ? LIMIT 1");
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    return $stmt->get_result()->fetch_assoc();
+}
+
 $database = new Database();
 $conn = $database->getConnection();
 ?>

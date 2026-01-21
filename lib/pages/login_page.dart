@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
         _showMessage('Gagal Masuk', res['message'] ?? 'Email atau kata sandi tidak sesuai.');
       }
     } catch (e) {
-      _showMessage('Gangguan Koneksi', 'Pastikan localhost:8000 sudah aktif.');
+      _showMessage('Gangguan Koneksi', 'Pastikan koneksi internet aktif dan API https://arya.bersama.cloud dapat diakses.');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }

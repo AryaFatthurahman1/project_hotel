@@ -5,8 +5,9 @@ import '../models/booking.dart';
 import '../models/article.dart';
 
 class ApiService {
-  // During development use local PHP server to avoid CORS issues. Change to production URL when deployed.
-  static const String baseUrl = "http://localhost:8000";
+  // Use production URL for live cloud testing
+  static const String baseUrl = "https://arya.bersama.cloud";
+  // For local development, use: http://localhost:8000
 
   static Future<Map<String, dynamic>> post(String endpoint, 
       {Map<String, dynamic>? data, String? token}) async {

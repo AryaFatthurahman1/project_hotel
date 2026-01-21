@@ -1,24 +1,59 @@
 <?php
-// API Router for Luxury Hotel System
-// This file routes all API requests to appropriate endpoints
+/**
+ * API Router & Landing Page Loader
+ * The Emerald Imperial - Luxury Hotel System
+ * Dibuat oleh: Muhammad Arya Fatthurahman
+ */
 
-header("Content-Type: application/json");
+// 1. Error Reporting Configuration (Production Friendly)
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Hide errors from output to prevent JSON corruption
+
+// 2. Global Headers
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
-// Handle preflight OPTIONS request
+// 3. Handle Preflight Request
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
     exit();
 }
 
-// Get the requested endpoint
-$requestUri = $_SERVER['REQUEST_URI'];
+// 4. Get and Clean URI
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
 $requestUri = str_replace('/api/', '', $requestUri);
-$requestUri = explode('?', $requestUri)[0]; // Remove query parameters
+$requestUri = trim(explode('?', $requestUri)[0], '/');
 
-// Route to appropriate endpoint
+// 5. Detect if request is API or Browser
+$isApiRequest = (
+    strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false ||
+    strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Flutter') !== false ||
+    $_SERVER['REQUEST_METHOD'] !== 'GET' ||
+    !empty($requestUri)
+);
+
+// 6. Root Routing
+if (empty($requestUri)) {
+    if (!$isApiRequest) {
+        // Show Elegant Landing Page
+        require_once 'landing.php';
+        exit();
+    } else {
+        header("Content-Type: application/json");
+        echo json_encode([
+            'status' => true,
+            'message' => 'The Emerald Imperial API is Online',
+            'version' => '1.2.0',
+            'author' => 'Muhammad Arya Fatthurahman'
+        ]);
+        exit();
+    }
+}
+
+// 7. Endpoint Routing
+header("Content-Type: application/json");
+
 switch ($requestUri) {
     case 'login':
     case 'login.php':
@@ -69,38 +104,18 @@ switch ($requestUri) {
     case 'delete_data.php':
         require_once 'endpoints/delete_data.php';
         break;
-        
-    // Test endpoints
-    case 'test_login':
-    case 'test_login.php':
-        require_once 'tests/test_login.php';
-        break;
-        
-    case 'test_register':
-    case 'test_register.php':
-        require_once 'tests/test_register_fixed.php';
+
+    case 'test':
+    case 'test.php':
+        require_once 'tests/test.php';
         break;
         
     default:
-        // Return 404 for unknown endpoints
         http_response_code(404);
         echo json_encode([
             'status' => false,
             'message' => 'Endpoint not found: ' . $requestUri,
-            'available_endpoints' => [
-                'login',
-                'register',
-                'auth',
-                'profile',
-                'rooms',
-                'bookings',
-                'get_data',
-                'insert_data',
-                'update_data',
-                'delete_data',
-                'test_login',
-                'test_register'
-            ]
+            'hint' => 'Check your URL or contact administrator.'
         ]);
         break;
 }

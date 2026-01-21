@@ -1,16 +1,6 @@
 <?php
-include 'config.php';
-header('Content-Type: application/json');
-
-// Fungsi helper
-function response_json($status, $message, $data = null) {
-    echo json_encode([
-        "status" => $status ? "success" : "error", 
-        "message" => $message,
-        "data" => $data
-    ]);
-    exit;
-}
+// api/endpoints/get_data.php
+require_once __DIR__ . '/../config/config.php';
 
 // Ambil parameter
 $table = $_GET['table'] ?? '';
@@ -59,18 +49,15 @@ switch ($table) {
         response_json(false, 'Invalid table name');
 }
 
-$stmt->execute();
-$result = $stmt->get_result();
-
-$data = [];
-while ($row = $result->fetch_assoc()) {
-    $data[] = $row;
-}
-
-if (count($data) > 0) {
+if ($stmt->execute()) {
+    $result = $stmt->get_result();
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
     response_json(true, 'Data retrieved successfully', $data);
 } else {
-    response_json(true, 'No data found', []);
+    response_json(false, 'Query failed: ' . $conn->error);
 }
 
 $stmt->close();

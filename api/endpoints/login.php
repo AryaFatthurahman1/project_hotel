@@ -1,5 +1,5 @@
 <?php
-require_once '../config/config.php';
+require_once __DIR__ . '/../config/config.php';
 
 // Accept JSON or form-data
 $input = json_decode(file_get_contents('php://input'), true) ?? $_POST;
