@@ -11,7 +11,12 @@ class ApiService {
   // Helper untuk membersihkan path dari double slashes
   static Uri _buildUri(String endpoint) {
     String cleanEndpoint = endpoint.startsWith('/') ? endpoint : '/$endpoint';
-    return Uri.parse('$baseUrl$cleanEndpoint');
+    // Gunakan try-catch untuk URI parsing
+    try {
+      return Uri.parse('$baseUrl$cleanEndpoint');
+    } catch (e) {
+      return Uri.parse(baseUrl);
+    }
   }
 
   static Future<Map<String, dynamic>> post(String endpoint, 
@@ -29,7 +34,7 @@ class ApiService {
       if (response.body.contains('<!DOCTYPE html>') || response.body.contains('<html>')) {
         return {
           'status': false,
-          'message': 'Server Error (HTML): Pastikan file .htaccess sudah diupload ke https://arya.bersama.cloud/'
+          'message': 'Server Error (HTML): Gagal terhubung ke API. Pastikan file index.php dan .htaccess sudah diupload dengan benar di Hosting.'
         };
       }
       
@@ -50,7 +55,7 @@ class ApiService {
       if (response.body.contains('<!DOCTYPE html>') || response.body.contains('<html>')) {
         return {
           'status': false,
-          'message': 'Server Error (HTML): Gagal memproses permintaan $endpoint'
+          'message': 'Server memberikan respons HTML (Error). Mohon cek konfigurasi Hosting.'
         };
       }
       
@@ -119,7 +124,18 @@ class ApiService {
   }
 
   static Future<Map<String, dynamic>> insertBooking(Map<String, dynamic> data) async {
-    data['table'] = 'bookings'; // Set table for generic insert
+    data['table'] = 'bookings';
     return post("/insert_data", data: data);
+  }
+
+  // New: Method untuk mengecek koneksi API secara langsung
+  static Future<Map<String, dynamic>> checkApiStatus() async {
+    try {
+      final response = await http.get(Uri.parse('$baseUrl/test_conn.php'))
+          .timeout(const Duration(seconds: 5));
+      return jsonDecode(response.body);
+    } catch (e) {
+      return {'status': false, 'message': e.toString()};
+    }
   }
 }

@@ -8,6 +8,7 @@ class Hotel {
   final String? imageUrl;
   final String? description;
   final DateTime? createdAt;
+  bool isFavorite; // Added for UI favorites
 
   Hotel({
     required this.id, 
@@ -19,6 +20,7 @@ class Hotel {
     this.imageUrl, 
     this.description,
     this.createdAt,
+    this.isFavorite = false,
   });
 
   factory Hotel.fromJson(Map<String, dynamic> json) {
@@ -32,12 +34,12 @@ class Hotel {
 
     return Hotel(
       id: json['id'] is int ? json['id'] : int.tryParse(json['id'].toString()) ?? 0,
-      name: json['name'] ?? '',
-      location: (json['location'] ?? json['alamat']) ?? '',
+      name: json['name'] ?? json['hotel_name'] ?? '',
+      location: (json['location'] ?? json['hotel_location'] ?? json['alamat']) ?? '',
       price: double.tryParse(json['price'].toString()) ?? 0.0,
       stars: double.tryParse(json['stars'].toString()) ?? 4.0,
       facilities: facilList.isEmpty ? ['WiFi', 'AC', 'TV'] : facilList,
-      imageUrl: json['image_url'] ?? json['foto'],
+      imageUrl: json['image_url'] ?? json['hotel_image'] ?? json['foto'],
       description: json['description'],
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
     );

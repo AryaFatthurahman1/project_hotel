@@ -25,6 +25,7 @@ class _HomePageState extends State<HomePage> {
   List<Booking> _bookings = [];
   bool _isLoading = true;
   String _searchQuery = "";
+  final List<int> _wishlistIds = [];
 
   @override
   void initState() {
@@ -33,6 +34,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _loadData() async {
+    if (!mounted) return;
     setState(() => _isLoading = true);
     try {
       final hotels = await ApiService.getHotels();
@@ -48,8 +50,10 @@ class _HomePageState extends State<HomePage> {
         });
       }
     } catch (e) {
-      if (mounted) setState(() => _isLoading = false);
-      _showMessage('Koneksi Gagal', 'Gagal memuat data dari server. Periksa koneksi internet Anda. Detail: $e');
+      if (mounted) {
+        setState(() => _isLoading = false);
+        _showMessage('Koneksi Gagal', 'Gagal memuat data dari server. Detail: $e');
+      }
     }
   }
 
@@ -58,8 +62,9 @@ class _HomePageState extends State<HomePage> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF1B3022),
-        title: Text(title, style: const TextStyle(color: Color(0xFFD4AF37))),
-        content: Text(message, style: const TextStyle(color: Colors.white70)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: Text(title, style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 16)),
+        content: Text(message, style: const TextStyle(color: Colors.white70, fontSize: 13)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -68,6 +73,16 @@ class _HomePageState extends State<HomePage> {
         ],
       )
     );
+  }
+
+  void _toggleWishlist(int id) {
+    setState(() {
+      if (_wishlistIds.contains(id)) {
+        _wishlistIds.remove(id);
+      } else {
+        _wishlistIds.add(id);
+      }
+    });
   }
 
   Future<void> _logout() async {
@@ -94,10 +109,6 @@ class _HomePageState extends State<HomePage> {
         foregroundColor: const Color(0xFFD4AF37),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none, size: 22),
-            onPressed: () {},
-          ),
-          IconButton(
             icon: const Icon(Icons.logout, size: 20),
             onPressed: _logout,
           ),
@@ -122,8 +133,8 @@ class _HomePageState extends State<HomePage> {
           backgroundColor: const Color(0xFF1B3022),
           selectedItemColor: const Color(0xFFD4AF37),
           unselectedItemColor: Colors.white24,
-          selectedFontSize: 10,
-          unselectedFontSize: 10,
+          selectedFontSize: 9,
+          unselectedFontSize: 9,
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'BERANDA'),
             BottomNavigationBarItem(icon: Icon(Icons.hotel_outlined), activeIcon: Icon(Icons.hotel), label: 'HOTEL'),
@@ -150,38 +161,59 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHomeContent() {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Welcome Header
+          // Elegant Welcome Header
           Container(
-            padding: const EdgeInsets.all(25),
+            padding: const EdgeInsets.fromLTRB(25, 30, 25, 40),
             width: double.infinity,
             decoration: const BoxDecoration(
-              color: Color(0xFF1B3022),
-              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(30), bottomRight: Radius.circular(30)),
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color(0xFF1B3022), Color(0xFF0F1B14)],
+              ),
+              borderRadius: BorderRadius.only(bottomLeft: Radius.circular(35), bottomRight: Radius.circular(35)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Sore, ${widget.user.name.split(' ')[0]}', style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 5),
-                const Text('Temukan kemewahan menginap Anda', style: TextStyle(color: Colors.white38, fontSize: 13)),
-                const SizedBox(height: 25),
-                // Search Bar
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Halo, ${widget.user.name.split(' ')[0]}!', style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.bold, letterSpacing: 1)),
+                        const SizedBox(height: 5),
+                        const Text('Temukan kemewahan menginap Anda', style: TextStyle(color: Colors.white38, fontSize: 13)),
+                      ],
+                    ),
+                    const CircleAvatar(
+                      backgroundColor: Color(0xFFD4AF37),
+                      child: Icon(Icons.person, color: Colors.black),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 35),
+                // Premium Search Bar
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  height: 55,
                   decoration: BoxDecoration(
-                    color: Colors.black.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(15),
+                    color: Colors.white.withOpacity(0.05),
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.white10),
                   ),
                   child: TextField(
                     onChanged: (v) => setState(() => _searchQuery = v),
                     style: const TextStyle(color: Colors.white),
                     decoration: const InputDecoration(
-                      hintText: 'Cari hotel atau lokasi...',
-                      hintStyle: TextStyle(color: Colors.white12, fontSize: 14),
-                      icon: Icon(Icons.search, color: Color(0xFFD4AF37), size: 18),
+                      hintText: 'Cari hotel, lokasi, atau artikel...',
+                      hintStyle: TextStyle(color: Colors.white24, fontSize: 14),
+                      icon: Icon(Icons.search, color: Color(0xFFD4AF37), size: 20),
                       border: InputBorder.none,
                     ),
                   ),
@@ -190,26 +222,38 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
 
-          const SizedBox(height: 30),
-          _buildSectionTitle('PENAWARAN KHUSUS'),
-          const SizedBox(height: 15),
+          const SizedBox(height: 10),
+          _buildSectionTitle('PENAWARAN EKSKLUSIF'),
+          const SizedBox(height: 20),
           SizedBox(
-            height: 180,
+            height: 200,
             child: ListView(
               scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 15),
+              padding: const EdgeInsets.symmetric(horizontal: 20),
               children: [
-                _buildPromoCard('DISCOUNT 30%', 'Emerald Suite', 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461'),
-                _buildPromoCard('GIFT VOUCHER', 'Spa & Wellness', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874'),
+                _buildPromoCard('EMERALD SUITE', 'Diskon 30% hari ini', 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461?auto=format&fit=crop&q=80'),
+                _buildPromoCard('SPA LUXURY', 'Voucher Rp 500k', 'https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&q=80'),
+                _buildPromoCard('DINING ACCESS', 'Gratis Dinner VIP', 'https://images.unsplash.com/photo-1550966842-28ca9268e3e4?auto=format&fit=crop&q=80'),
               ],
             ),
           ),
 
-          const SizedBox(height: 30),
-          _buildSectionTitle('REKOMENDASI HOTEL'),
-          const SizedBox(height: 15),
-          ..._hotels.take(3).map((h) => _buildHotelCard(h)),
-          const SizedBox(height: 30),
+          const SizedBox(height: 35),
+          _buildSectionTitle('HOTEL PILIHAN'),
+          const SizedBox(height: 20),
+          if (_hotels.isEmpty) 
+             const Center(child: Padding(padding: EdgeInsets.all(50), child: Text("Memuat hotel...", style: TextStyle(color: Colors.white24))))
+          else 
+             ..._hotels.take(4).map((h) => _buildHotelCard(h)),
+          
+          const SizedBox(height: 35),
+          _buildSectionTitle('ARTIKEL TERBARU'),
+          const SizedBox(height: 20),
+          if (_articles.isEmpty)
+             const Center(child: Padding(padding: EdgeInsets.all(50), child: Text("Memuat artikel...", style: TextStyle(color: Colors.white24))))
+          else
+             ..._articles.take(3).map((a) => _buildArticleCard(a)),
+          const SizedBox(height: 50),
         ],
       ),
     );
@@ -217,11 +261,13 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildHotelsContent() {
     final filtered = _hotels.where((h) => h.name.toLowerCase().contains(_searchQuery.toLowerCase()) || h.location.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(vertical: 20),
-      itemCount: filtered.length,
-      itemBuilder: (context, index) => _buildHotelCard(filtered[index]),
-    );
+    return filtered.isEmpty 
+      ? _buildEmptyState(Icons.hotel_outlined, 'Tidak ada hotel ditemukan')
+      : ListView.builder(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          itemCount: filtered.length,
+          itemBuilder: (context, index) => _buildHotelCard(filtered[index]),
+        );
   }
 
   Widget _buildBookingsContent() {
@@ -235,11 +281,14 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildArticlesContent() {
-    return ListView.builder(
-      padding: const EdgeInsets.all(20),
-      itemCount: _articles.length,
-      itemBuilder: (context, index) => _buildArticleCard(_articles[index]),
-    );
+    final filtered = _articles.where((article) => article.title.toLowerCase().contains(_searchQuery.toLowerCase())).toList();
+    return filtered.isEmpty 
+      ? _buildEmptyState(Icons.article_outlined, 'Tidak ada artikel ditemukan')
+      : ListView.builder(
+          padding: const EdgeInsets.all(20),
+          itemCount: filtered.length,
+          itemBuilder: (context, index) => _buildArticleCard(filtered[index]),
+        );
   }
 
   // --- COMPONENTS ---
@@ -247,34 +296,45 @@ class _HomePageState extends State<HomePage> {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: Text(
-        title,
-        style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 11),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 11),
+          ),
+          const Icon(Icons.arrow_forward_ios, color: Colors.white10, size: 10),
+        ],
       ),
     );
   }
 
   Widget _buildPromoCard(String title, String subtitle, String img) {
     return Container(
-      width: 280,
-      margin: const EdgeInsets.only(right: 15),
+      width: 300,
+      margin: const EdgeInsets.only(right: 20),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        image: DecorationImage(image: NetworkImage(img), fit: BoxFit.cover, colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.4), BlendMode.darken)),
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
+        image: DecorationImage(
+          image: NetworkImage(img), 
+          fit: BoxFit.cover, 
+          colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.5), BlendMode.darken)
+        ),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(25),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.end,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-              color: const Color(0xFFD4AF37),
-              child: Text(title, style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold)),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              decoration: BoxDecoration(color: const Color(0xFFD4AF37), borderRadius: BorderRadius.circular(8)),
+              child: Text(title, style: const TextStyle(color: Colors.black, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
             ),
-            const SizedBox(height: 8),
-            Text(subtitle, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            Text(subtitle, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 0.5)),
           ],
         ),
       ),
@@ -282,55 +342,87 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildHotelCard(Hotel hotel) {
+    final isFav = _wishlistIds.contains(hotel.id);
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => HotelDetailPage(hotel: hotel, user: widget.user))),
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFF1B3022),
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(25),
           border: Border.all(color: Colors.white.withOpacity(0.05)),
+          boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.2), blurRadius: 15, offset: const Offset(0, 8))],
         ),
         child: Column(
           children: [
-            ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-              child: Hero(
-                tag: 'hotel-${hotel.id}',
-                child: hotel.imageUrl != null 
-                  ? Image.network(hotel.imageUrl!, height: 180, width: double.infinity, fit: BoxFit.cover)
-                  : Container(height: 180, color: Colors.grey),
-              ),
+            Stack(
+              children: [
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(topLeft: Radius.circular(25), topRight: Radius.circular(25)),
+                  child: Hero(
+                    tag: 'hotel-${hotel.id}',
+                    child: hotel.imageUrl != null 
+                      ? Image.network(hotel.imageUrl!, height: 200, width: double.infinity, fit: BoxFit.cover)
+                      : Container(height: 200, color: Colors.grey[850]),
+                  ),
+                ),
+                Positioned(
+                  top: 15, right: 15,
+                  child: GestureDetector(
+                    onTap: () => _toggleWishlist(hotel.id),
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(color: Colors.black.withOpacity(0.4), shape: BoxShape.circle),
+                      child: Icon(isFav ? Icons.favorite : Icons.favorite_border, color: const Color(0xFFD4AF37), size: 18),
+                    ),
+                  ),
+                ),
+              ],
             ),
             Padding(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(25),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(hotel.name, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                      Expanded(child: Text(hotel.name, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold, letterSpacing: 0.5))),
                       Row(
                         children: [
-                          const Icon(Icons.star, color: Color(0xFFD4AF37), size: 16),
-                          const SizedBox(width: 4),
-                          Text(hotel.stars.toString(), style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold)),
+                          const Icon(Icons.star, color: Color(0xFFD4AF37), size: 18),
+                          const SizedBox(width: 5),
+                          Text(hotel.stars.toString(), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ],
                   ),
-                  const SizedBox(height: 5),
-                  Text(hotel.location, style: const TextStyle(color: Colors.white38, fontSize: 12)),
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      const Icon(Icons.location_on, color: Colors.white24, size: 14),
+                      const SizedBox(width: 5),
+                      Text(hotel.location, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text('Rp ${hotel.price.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 16, fontWeight: FontWeight.bold)),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('HARGA MULAI', style: TextStyle(color: Colors.white24, fontSize: 9, letterSpacing: 1)),
+                          Text('Rp ${hotel.price.toStringAsFixed(0)}', style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 18, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                        decoration: BoxDecoration(border: Border.all(color: const Color(0xFFD4AF37)), borderRadius: BorderRadius.circular(10)),
-                        child: const Text('LIHAT DETAIL', style: TextStyle(color: Color(0xFFD4AF37), fontSize: 9, fontWeight: FontWeight.bold)),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFD4AF37),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Text('PESAN', style: TextStyle(color: Colors.black, fontSize: 11, fontWeight: FontWeight.bold, letterSpacing: 1)),
                       ),
                     ],
                   ),
@@ -345,31 +437,46 @@ class _HomePageState extends State<HomePage> {
 
   Widget _buildBookingCard(Booking booking) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 15),
-      padding: const EdgeInsets.all(20),
+      margin: const EdgeInsets.only(bottom: 20),
+      padding: const EdgeInsets.all(25),
       decoration: BoxDecoration(
         color: const Color(0xFF1B3022),
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: Colors.white.withOpacity(0.05)),
       ),
       child: Row(
         children: [
           Container(
-            width: 50, height: 50,
-            decoration: BoxDecoration(color: const Color(0xFFD4AF37).withOpacity(0.1), borderRadius: BorderRadius.circular(10)),
-            child: const Icon(Icons.hotel, color: Color(0xFFD4AF37)),
+            width: 60, height: 60,
+            decoration: BoxDecoration(color: const Color(0xFFD4AF37).withOpacity(0.1), borderRadius: BorderRadius.circular(15)),
+            child: const Icon(Icons.hotel, color: Color(0xFFD4AF37), size: 30),
           ),
-          const SizedBox(width: 15),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(booking.hotelName ?? 'Hotel', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                Text('Status: ${booking.status.toUpperCase()}', style: TextStyle(color: booking.status == 'confirmed' ? Colors.green : Color(0xFFD4AF37), fontSize: 10, fontWeight: FontWeight.bold)),
+                Text(booking.hotelName ?? 'Nama Hotel', style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 5),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: booking.status.toLowerCase() == 'confirmed' ? Colors.green.withOpacity(0.2) : const Color(0xFFD4AF37).withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(5)
+                  ),
+                  child: Text(
+                    booking.status.toUpperCase(), 
+                    style: TextStyle(
+                      color: booking.status.toLowerCase() == 'confirmed' ? Colors.greenAccent : const Color(0xFFD4AF37), 
+                      fontSize: 9, 
+                      fontWeight: FontWeight.bold
+                    )
+                  ),
+                ),
               ],
             ),
           ),
-          const Icon(Icons.qr_code, color: Colors.white24, size: 24),
+          const Icon(Icons.qr_code_2, color: Colors.white24, size: 28),
         ],
       ),
     );
@@ -379,23 +486,31 @@ class _HomePageState extends State<HomePage> {
     return GestureDetector(
       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (context) => ArticleDetailPage(article: article))),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 20),
-        decoration: BoxDecoration(color: const Color(0xFF1B3022), borderRadius: BorderRadius.circular(15)),
+        margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFF1B3022), 
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.only(topLeft: Radius.circular(15), topRight: Radius.circular(15)),
-              child: article.imageUrl != null ? Image.network(article.imageUrl!, height: 150, width: double.infinity, fit: BoxFit.cover) : Container(height: 150, color: Colors.grey),
+              borderRadius: const BorderRadius.only(topLeft: Radius.circular(20), topRight: Radius.circular(20)),
+              child: article.imageUrl != null 
+                ? Image.network(article.imageUrl!, height: 160, width: double.infinity, fit: BoxFit.cover) 
+                : Container(height: 160, color: Colors.grey[850]),
             ),
             Padding(
-              padding: const EdgeInsets.all(15),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(article.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                  Text(article.category ?? 'Travel', style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                  const SizedBox(height: 8),
+                  Text(article.title, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 17, letterSpacing: 0.5)),
                   const SizedBox(height: 10),
-                  Text(article.content ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white38, fontSize: 12)),
+                  Text(article.content ?? '', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(color: Colors.white38, fontSize: 12, height: 1.5)),
                 ],
               ),
             )
@@ -412,7 +527,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           Icon(icon, color: Colors.white12, size: 80),
           const SizedBox(height: 15),
-          Text(txt, style: const TextStyle(color: Colors.white12)),
+          Text(txt, style: const TextStyle(color: Colors.white12, letterSpacing: 1)),
         ],
       ),
     );
