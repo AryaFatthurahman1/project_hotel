@@ -1,74 +1,83 @@
 -- Database: hotel_arya
--- Created by: Muhammad Arya Fatthurahman - 2023230006 - Teknologi Informasi
--- Universitas Darma Persada (Unsada)
+-- Updated for: The Emerald Imperial Luxury System
+-- Author: Muhammad Arya Fatthurahman
 
-CREATE DATABASE IF NOT EXISTS hotel_arya;
-USE hotel_arya;
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- Tabel 1: users
-CREATE TABLE users (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    nim VARCHAR(20) NOT NULL,
-    nama_lengkap VARCHAR(100) NOT NULL,
-    email VARCHAR(100) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    phone VARCHAR(15),
-    alamat TEXT,
-    foto_profil VARCHAR(255) DEFAULT NULL,
-    role ENUM('user', 'admin') DEFAULT 'user',
-    api_token VARCHAR(255) DEFAULT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Tabel: users
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `nim` varchar(20) DEFAULT NULL,
+  `nama_lengkap` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `phone` varchar(15) DEFAULT NULL,
+  `alamat` text DEFAULT NULL,
+  `foto_profil` varchar(255) DEFAULT NULL,
+  `role` enum('user','admin') DEFAULT 'user',
+  `api_token` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabel 2: rooms
-CREATE TABLE rooms (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    room_number VARCHAR(10) UNIQUE NOT NULL,
-    room_type VARCHAR(50) NOT NULL,
-    description TEXT,
-    price_per_night DECIMAL(10,2) NOT NULL,
-    capacity INT DEFAULT 2,
-    facilities TEXT,
-    image_url VARCHAR(255),
-    is_available BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
+-- Data Awal Users (Password: 123)
+INSERT INTO `users` (`nama_lengkap`, `email`, `password`, `role`, `api_token`) VALUES
+('Muhammad Arya Fatthurahman', 'aryafatthurahman4@gmail.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'MASTER_ADMIN_BYPASS_TOKEN'),
+('Admin Hotel', 'admin@emerald.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin', 'ADMIN_TOKEN_123');
 
--- Tabel 3: bookings
-CREATE TABLE bookings (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    room_id INT NOT NULL,
-    check_in DATE NOT NULL,
-    check_out DATE NOT NULL,
-    total_nights INT NOT NULL,
-    total_price DECIMAL(10,2) NOT NULL,
-    status ENUM('pending', 'confirmed', 'cancelled', 'completed') DEFAULT 'pending',
-    payment_method VARCHAR(50),
-    payment_status ENUM('unpaid', 'paid', 'refunded') DEFAULT 'unpaid',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (room_id) REFERENCES rooms(id) ON DELETE CASCADE
-);
+-- Tabel: hotels
+CREATE TABLE IF NOT EXISTS `hotels` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `location` varchar(255) NOT NULL,
+  `price` decimal(15,2) NOT NULL,
+  `stars` decimal(2,1) DEFAULT 4.0,
+  `description` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `facilities` varchar(255) DEFAULT 'WiFi,AC,Pool,Gym',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Tabel 4: messages (untuk fitur message)
-CREATE TABLE messages (
-    id INT PRIMARY KEY AUTO_INCREMENT,
-    user_id INT NOT NULL,
-    message TEXT NOT NULL,
-    type ENUM('info', 'promo', 'notification') DEFAULT 'info',
-    is_read BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
+INSERT INTO `hotels` (`name`, `location`, `price`, `stars`, `description`, `image_url`, `facilities`) VALUES
+('The Emerald Imperial', 'Jakarta Selatan, Indonesia', 2500000.00, 5.0, 'Pengalaman menginap paling mewah di jantung kota Jakarta dengan pelayanan butler 24 jam.', 'https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?auto=format&fit=crop&q=80', 'WiFi,AC,Pool,Gym,Spa,Parking'),
+('Sapphire Garden Resort', 'Bali, Indonesia', 1850000.00, 4.5, 'Resort tepi pantai dengan pemandangan sunset yang menakjubkan dan taman tropis yang luas.', 'https://images.unsplash.com/photo-1571896349842-33c89424de2d?auto=format&fit=crop&q=80', 'WiFi,Pool,Beach Access,Restaurant'),
+('Ruby City Boutique', 'Bandung, Indonesia', 950000.00, 4.0, 'Hotel butik dengan desain unik dan lokasi strategis dekat dengan pusat perbelanjaan.', 'https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&q=80', 'WiFi,AC,Cafe,Laundry'),
+('Diamond Mountain Retreat', 'Puncak, Bogor', 1200000.00, 4.2, 'Udara segar pegunungan dan ketenangan yang tidak tertandingi untuk liburan keluarga.', 'https://images.unsplash.com/photo-1445019980597-93fa8acb246c?auto=format&fit=crop&q=80', 'WiFi,AC,Garden,Kid Zone');
 
--- Insert Admin User (password: admin123)
-INSERT INTO users (nim, nama_lengkap, email, password, phone, role) VALUES
-('2023230006', 'Muhammad Arya Fatthurahman', 'arya@unsada.ac.id', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', '08123456789', 'admin');
+-- Tabel: articles
+CREATE TABLE IF NOT EXISTS `articles` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `category` varchar(50) DEFAULT 'Travel',
+  `content` text DEFAULT NULL,
+  `image_url` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Insert Sample Rooms
-INSERT INTO rooms (room_number, room_type, description, price_per_night, capacity, facilities, image_url) VALUES
-('101', 'Deluxe Room', 'Kamar mewah dengan pemandangan kota', 1500000.00, 2, 'AC, TV LED, WiFi, Bathub', 'https://images.unsplash.com/photo-1611892440504-42a792e24d32'),
-('102', 'Executive Suite', 'Suite dengan ruang tamu terpisah', 2500000.00, 3, 'AC, TV 50", Kitchenette, Jacuzzi', 'https://images.unsplash.com/photo-1566665797739-1674de7a421a'),
-('201', 'Presidential Suite', 'Kamar terbaik hotel dengan semua fasilitas', 5000000.00, 4, 'AC, TV 65", Private Pool, Butler Service', 'https://images.unsplash.com/photo-1578683010236-d716f9a3f461'),
-('202', 'Family Room', 'Kamar luas untuk keluarga', 3000000.00, 5, 'AC, 2 Bedrooms, TV, Play Area', 'https://images.unsplash.com/photo-1590490360182-c33d57733427');
+INSERT INTO `articles` (`title`, `category`, `content`, `image_url`) VALUES
+('Tips Traveling Hemat di Tahun 2026', 'Travel Tips', 'Traveling tidak harus mahal. Dengan perencanaan yang matang dan pemilihan waktu yang tepat, Anda bisa menikmati liburan mewah...', 'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?auto=format&fit=crop&q=80'),
+('5 Destinasi Hits di Jakarta', 'Destinasi', 'Jakarta tidak hanya tentang kemacetan. Temukan hidden gems di Jakarta Selatan yang sangat Instagramable dan seru untuk dikunjungi...', 'https://images.unsplash.com/photo-1555881400-74d7acaacd8b?auto=format&fit=crop&q=80'),
+('Promo Emerald Imperial Bulan Ini', 'Promo', 'Dapatkan diskon eksklusif hingga 40% untuk pemesanan melalui aplikasi mobile The Emerald Imperial selama periode Januari...', 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?auto=format&fit=crop&q=80');
+
+-- Tabel: bookings
+CREATE TABLE IF NOT EXISTS `bookings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(11) NOT NULL,
+  `hotel_id` int(11) NOT NULL,
+  `check_in` date NOT NULL,
+  `check_out` date NOT NULL,
+  `total_price` decimal(15,2) NOT NULL,
+  `status` enum('pending','confirmed','cancelled','completed') DEFAULT 'pending',
+  `qr_code` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  CONSTRAINT `fk_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_hotel` FOREIGN KEY (`hotel_id`) REFERENCES `hotels` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+COMMIT;

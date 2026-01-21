@@ -16,6 +16,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _isLoading = false;
@@ -26,6 +27,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -56,6 +58,7 @@ class _RegisterPageState extends State<RegisterPage> {
         _nameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
+        _phoneController.text.trim(),
       );
 
       final ok = (res['status'] == true) || (res['status'] == 'success');
@@ -235,6 +238,22 @@ class _RegisterPageState extends State<RegisterPage> {
                               if (!value.contains('@')) return 'Format email salah';
                               return null;
                             },
+                          ),
+                          const SizedBox(height: 25),
+
+                          // Phone Field
+                          TextFormField(
+                            controller: _phoneController,
+                            style: const TextStyle(color: Colors.white),
+                            decoration: const InputDecoration(
+                              labelText: "NOMOR TELEPON",
+                              labelStyle: TextStyle(color: Colors.white60, fontSize: 10, letterSpacing: 1),
+                              prefixIcon: Icon(Icons.phone_outlined, color: Color(0xFFD4AF37), size: 18),
+                              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: Colors.white24)),
+                              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: Color(0xFFD4AF37))),
+                            ),
+                            enabled: !_isLoading,
+                            keyboardType: TextInputType.phone,
                           ),
                           const SizedBox(height: 25),
 

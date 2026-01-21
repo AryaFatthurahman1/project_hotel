@@ -1,14 +1,14 @@
 <?php
 /**
- * THE EMERALD IMPERIAL - ULTIMATE ROUTER
+ * THE EMERALD IMPERIAL - GOLD STANDARD ROUTER
  * Dibuat oleh: Muhammad Arya Fatthurahman
  */
 
-// 1. Konfigurasi Error
+// 1. Error Prevention
 error_reporting(E_ALL);
-ini_set('display_errors', 0);
+ini_set('display_errors', 0); // Matikan display error agar tidak merusak JSON
 
-// 2. Global Headers (CORS)
+// 2. Security Headers
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
@@ -18,87 +18,78 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// 3. Deteksi Path
-$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-// Jika di subfolder /api/, bersihkan
-$uri = str_replace('/api/', '/', $uri);
-$uri = trim($uri, '/');
+// 3. Robust URI Detection
+$requestUri = $_SERVER['REQUEST_URI'] ?? '/';
+// Clean base path if any
+$basePath = '/';
+if (strpos($requestUri, '/api/') === 0) { $requestUri = substr($requestUri, 4); }
+$requestUri = trim(explode('?', $requestUri)[0], '/');
 
-// 4. Deteksi Browser vs API
-$userAgent = $_SERVER['HTTP_USER_AGENT'] ?? '';
-$isApp = (strpos($userAgent, 'Flutter') !== false || strpos($userAgent, 'dart') !== false);
-$acceptJson = (strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false);
+$isApp = (strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Flutter') !== false || strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'json') !== false);
 
-// 5. ROUTING UTAMA
-if (empty($uri)) {
-    // Jika akses root domain (https://arya.bersama.cloud/)
-    if ($isApp || $acceptJson) {
-        header("Content-Type: application/json");
-        echo json_encode([
-            'status' => true,
-            'message' => 'The Emerald Imperial API is Online',
-            'version' => '1.3.0',
-            'author' => 'Muhammad Arya Fatthurahman'
-        ]);
+// 4. ROUTING LOGIC
+if (empty($requestUri)) {
+    if (!$isApp) {
+        if (file_exists('landing.php')) { require_once 'landing.php'; }
+        else { echo "<h1>Emerald Imperial</h1><p>Luxury System Online</p>"; }
         exit();
-    } else {
-        // Tampilkan landing page untuk pengunjung web
-        if (file_exists('landing.php')) {
-            require_once 'landing.php';
-        } else {
-            echo "<h1>The Emerald Imperial</h1><p>Luxury Hotel System Online</p>";
-        }
+    }
+    $requestUri = ''; // Ensure it matches the map root
+}
+
+// Explicit Admin Route
+if ($requestUri === 'admin') {
+    if (file_exists('admin/index.html')) {
+        readfile('admin/index.html');
         exit();
     }
 }
 
-// 6. ENDPOINT ROUTING
-header("Content-Type: application/json");
-
-// Normalisasikan endpoint (hapus .php jika ada)
-$endpoint = str_replace('.php', '', $uri);
-
-switch ($endpoint) {
-    case 'login':
-        require_once 'endpoints/login.php';
-        break;
-    case 'register':
-        require_once 'endpoints/register.php';
-        break;
-    case 'auth':
-        require_once 'endpoints/auth.php';
-        break;
-    case 'profile':
-        require_once 'endpoints/profile.php';
-        break;
-    case 'rooms':
-        require_once 'endpoints/rooms.php';
-        break;
-    case 'bookings':
-        require_once 'endpoints/bookings.php';
-        break;
-    case 'get_data':
-        require_once 'endpoints/get_data.php';
-        break;
-    case 'insert_data':
-        require_once 'endpoints/insert_data.php';
-        break;
-    case 'update_data':
-        require_once 'endpoints/update_data.php';
-        break;
-    case 'delete_data':
-        require_once 'endpoints/delete_data.php';
-        break;
-    case 'test':
-        require_once 'tests/test.php';
-        break;
-    default:
-        http_response_code(200); // Selalu 200 agar Flutter tidak crash, tapi status false
-        echo json_encode([
-            'status' => false,
-            'message' => "Endpoint '$uri' tidak ditemukan",
-            'available' => ['login', 'register', 'rooms', 'bookings', 'profile']
-        ]);
-        break;
+// 5. API RESPONSE HANDLER
+function sendResponse($status, $message, $data = null) {
+    header("Content-Type: application/json");
+    echo json_encode([
+        'status' => $status,
+        'message' => $message,
+        'data' => $data,
+        'timestamp' => time()
+    ]);
+    exit();
 }
+
+// 6. ENDPOINT MAPPING
+$endpointMap = [
+    '' => 'root',
+    'login' => 'endpoints/login.php',
+    'register' => 'endpoints/register.php',
+    'auth' => 'endpoints/auth.php',
+    'profile' => 'endpoints/profile.php',
+    'rooms' => 'endpoints/rooms.php',
+    'bookings' => 'endpoints/bookings.php',
+    'get_data' => 'endpoints/get_data.php',
+    'insert_data' => 'endpoints/insert_data.php',
+    'update_data' => 'endpoints/update_data.php',
+    'delete_data' => 'endpoints/delete_data.php'
+];
+
+$file = $endpointMap[$requestUri] ?? null;
+
+if ($file === 'root') {
+    sendResponse(true, "The Emerald Imperial API is fully operational.");
+}
+
+if ($file && file_exists($file)) {
+    require_once $file;
+    exit();
+}
+
+// 7. Fallback for .php extension
+if (file_exists("endpoints/$requestUri.php")) {
+    require_once "endpoints/$requestUri.php";
+    exit();
+}
+
+// 404
+http_response_code(200); // Ganti dari 404 ke 200 agar Flutter tidak crash, tapi status false
+sendResponse(false, "Endpoint '$requestUri' tidak ditemukan. Pastikan URL benar.");
 ?>

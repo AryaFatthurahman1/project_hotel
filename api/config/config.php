@@ -1,31 +1,26 @@
 <?php
-// config.php
-// Dual-environment database connection (Localhost & Production)
-// Dibuat oleh: Muhammad Arya Fatthurahman - 2023230006
+// api/config/config.php
 
-header("Access-Control-Allow-Origin: *");
-header("Content-Type: application/json; charset=UTF-8");
-header("Access-Control-Allow-Methods: POST, GET, PUT, DELETE");
-header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
-
+// Setting zona waktu
 date_default_timezone_set('Asia/Jakarta');
 
+// Database configuration
 class Database {
-    public $host;
-    public $db_name;
-    public $username;
-    public $password;
+    private $host;
+    private $db_name;
+    private $username;
+    private $password;
     public $conn;
 
     public function __construct() {
         if ($_SERVER['SERVER_NAME'] === 'localhost' || $_SERVER['SERVER_ADDR'] === '127.0.0.1') {
-            // Localhost Config
+            // Localhost (Laragon/XAMPP)
             $this->host = "localhost";
             $this->db_name = "hotel_arya";
             $this->username = "root";
             $this->password = "";
         } else {
-            // Production Config (arya.bersama.cloud)
+            // Production (arya.bersama.cloud - Rumahweb)
             $this->host = "localhost";
             $this->db_name = "bere9277_db_arya";
             $this->username = "bere9277_user_arya";
@@ -37,27 +32,31 @@ class Database {
         $this->conn = null;
         try {
             $this->conn = new mysqli($this->host, $this->username, $this->password, $this->db_name);
-            
             if ($this->conn->connect_error) {
-                // Return descriptive error for easier debugging
-                response_json(false, "Koneksi Database Gagal: " . $this->conn->connect_error . " (Host: $this->host, DB: $this->db_name)");
+                throw new Exception("Connection failed: " . $this->conn->connect_error);
             }
-            
-            $this->conn->set_charset("utf8mb4");
-        } catch(Exception $e) {
-            response_json(false, "Database error: " . $e->getMessage());
+        } catch (Exception $e) {
+            http_response_code(500);
+            header("Content-Type: application/json");
+            echo json_encode(["status" => false, "message" => "DATABASE ERROR: " . $e->getMessage()]);
+            exit();
         }
         return $this->conn;
     }
 }
 
-function response_json($status, $message = "", $data = null) {
-    header('Content-Type: application/json');
-    $s = ($status === true || $status === 'success' || $status === 1) ? true : false;
-    echo json_encode(["status" => $s, "message" => $message, "data" => $data]);
+// Global Response Helper
+function response_json($status, $message, $data = null) {
+    header("Content-Type: application/json");
+    echo json_encode([
+        'status' => $status,
+        'message' => $message,
+        'data' => $data
+    ]);
     exit();
 }
 
+// Token Validation Helper
 function validate_token($conn) {
     $headers = getallheaders();
     $token = null;
@@ -73,12 +72,13 @@ function validate_token($conn) {
 
     if (!$token) return null;
 
-    $stmt = $conn->prepare("SELECT id, nim, nama_lengkap, email, role, phone, alamat, foto_profil FROM users WHERE api_token = ? LIMIT 1");
+    $stmt = $conn->prepare("SELECT * FROM users WHERE api_token = ? LIMIT 1");
     $stmt->bind_param("s", $token);
     $stmt->execute();
     return $stmt->get_result()->fetch_assoc();
 }
 
-$database = new Database();
-$conn = $database->getConnection();
+// Start connection
+$db = new Database();
+$conn = $db->getConnection();
 ?>

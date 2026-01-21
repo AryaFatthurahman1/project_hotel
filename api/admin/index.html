@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE EMERALD IMPERIAL - Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #0f1b14; color: #fff; }
+        .emerald-gradient { background: linear-gradient(135deg, #1b3022 0%, #0f1b14 100%); }
+        .gold-glow { box-shadow: 0 0 15px rgba(212, 175, 55, 0.2); }
+        .gold-border { border-color: rgba(212, 175, 55, 0.3); }
+        h1, h2 { font-family: 'Playfair Display', serif; }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <div class="w-64 min-h-screen emerald-gradient border-r border-white/5 p-6">
+            <div class="mb-10 text-center">
+                <div class="w-16 h-16 border border-[#d4af37] rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-[#d4af37] text-2xl">✨</span>
+                </div>
+                <h1 class="text-[#d4af37] text-xl tracking-widest font-bold">EMERALD</h1>
+                <p class="text-white/30 text-[10px] tracking-tighter">ADMINISTRATION</p>
+            </div>
+            
+            <nav class="space-y-4">
+                <a href="#" class="flex items-center space-x-3 p-3 bg-[#d4af37]/10 text-[#d4af37] rounded-lg">
+                    <span>📊</span> <span>Dashboard</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 text-white/50 hover:text-[#d4af37] transition-all">
+                    <span>🏨</span> <span>Manage Hotels</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 text-white/50 hover:text-[#d4af37] transition-all">
+                    <span>📅</span> <span>Bookings</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 text-white/50 hover:text-[#d4af37] transition-all">
+                    <span>📝</span> <span>Articles</span>
+                </a>
+                <a href="#" class="flex items-center space-x-3 p-3 text-white/50 hover:text-[#d4af37] transition-all">
+                    <span>⚙️</span> <span>Settings</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 p-10">
+            <div class="flex justify-between items-center mb-10">
+                <h2 class="text-3xl font-bold">Executive Overview</h2>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <p class="text-sm font-semibold">Arya Fatthurahman</p>
+                        <p class="text-xs text-white/40">Master Administrator</p>
+                    </div>
+                    <div class="w-10 h-10 bg-[#d4af37] rounded-full overflow-hidden border border-[#d4af37]">
+                        <img src="https://ui-avatars.com/api/?name=Arya+Fatthurahman&background=d4af37&color=000" alt="">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="emerald-gradient p-6 rounded-2xl gold-border border gold-glow">
+                    <p class="text-white/40 text-xs mb-1">TOTAL REVENUE</p>
+                    <h3 class="text-2xl font-bold text-[#d4af37]">Rp 142.5M</h3>
+                </div>
+                <div class="emerald-gradient p-6 rounded-2xl gold-border border">
+                    <p class="text-white/40 text-xs mb-1">TOTAL BOOKINGS</p>
+                    <h3 class="text-2xl font-bold">852</h3>
+                </div>
+                <div class="emerald-gradient p-6 rounded-2xl gold-border border">
+                    <p class="text-white/40 text-xs mb-1">AVAILABLE ROOMS</p>
+                    <h3 class="text-2xl font-bold">14</h3>
+                </div>
+                <div class="emerald-gradient p-6 rounded-2xl gold-border border">
+                    <p class="text-white/40 text-xs mb-1">NEW USERS</p>
+                    <h3 class="text-2xl font-bold">124</h3>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                <div class="bg-black/20 p-8 rounded-3xl border border-white/5">
+                    <h4 class="text-lg font-bold mb-6">Booking Analytics</h4>
+                    <canvas id="bookingChart"></canvas>
+                </div>
+                <div class="bg-black/20 p-8 rounded-3xl border border-white/5">
+                    <h4 class="text-lg font-bold mb-6">Recent Activities</h4>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                                <p class="text-sm">John Doe booked Emerald Imperial</p>
+                            </div>
+                            <span class="text-[10px] text-white/30">2 mins ago</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-white/5 rounded-xl">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-2 h-2 rounded-full bg-[#d4af37]"></div>
+                                <p class="text-sm">Arya updated "Bandung Ruby" rate</p>
+                            </div>
+                            <span class="text-[10px] text-white/30">15 mins ago</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Bookings Table -->
+            <div class="bg-black/20 p-8 rounded-3xl border border-white/5">
+                <h4 class="text-lg font-bold mb-6">Recent Hotel Bookings</h4>
+                <table class="w-full text-left">
+                    <thead>
+                        <tr class="text-white/30 text-xs border-b border-white/5">
+                            <th class="pb-4">GUEST NAME</th>
+                            <th class="pb-4">HOTEL</th>
+                            <th class="pb-4">CHECK IN</th>
+                            <th class="pb-4">STATUS</th>
+                            <th class="pb-4 text-right">AMOUNT</th>
+                        </tr>
+                    </thead>
+                    <tbody class="text-sm">
+                        <tr class="border-b border-white/5">
+                            <td class="py-4">Jane Smith</td>
+                            <td class="py-4">Sapphire Garden</td>
+                            <td class="py-4 text-white/50">25 Jan 2026</td>
+                            <td class="py-4"><span class="px-2 py-1 bg-green-500/20 text-green-400 rounded-md text-[10px] uppercase font-bold">Confirmed</span></td>
+                            <td class="py-4 text-right">Rp 3.4M</td>
+                        </tr>
+                        <tr class="border-b border-white/5">
+                            <td class="py-4">Arya Fatthurahman</td>
+                            <td class="py-4">Emerald Imperial</td>
+                            <td class="py-4 text-white/50">28 Jan 2026</td>
+                            <td class="py-4"><span class="px-2 py-1 bg-yellow-500/20 text-yellow-400 rounded-md text-[10px] uppercase font-bold">Pending</span></td>
+                            <td class="py-4 text-right">Rp 12.5M</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const ctx = document.getElementById('bookingChart');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                datasets: [{
+                    label: 'Bookings',
+                    data: [12, 19, 3, 5, 2, 3, 15],
+                    borderColor: '#d4af37',
+                    backgroundColor: 'rgba(212, 175, 55, 0.1)',
+                    fill: true,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.3)' } },
+                    x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.3)' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>

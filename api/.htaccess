@@ -1,22 +1,20 @@
-<IfModule mod_headers.c>
-    # Ensure CORS and JSON headers are always present
-    Header always set Access-Control-Allow-Origin "*"
-    Header always set Access-Control-Allow-Methods "GET, POST, OPTIONS, PUT, DELETE"
-    Header always set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /
+
+    # Handle Subfolder /api/ if present
+    RewriteCond %{REQUEST_URI} ^/api/
+    RewriteRule ^api/(.*)$ index.php [L,QSA]
+
+    # Handle Root Level
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php [L,QSA]
 </IfModule>
 
-# Robust Rewrite Engine
-RewriteEngine On
-RewriteBase /
-
-# 1. Do not rewrite actual files or directories
-RewriteCond %{REQUEST_FILENAME} -f [OR]
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule ^ - [L]
-
-# 2. Redirect everything else to index.php
-RewriteRule ^(.*)$ index.php [QSA,L]
-
-# Handle OPTIONS requests efficiently
-RewriteCond %{REQUEST_METHOD} OPTIONS
-RewriteRule ^(.*)$ $1 [R=200,L]
+# Security
+<IfModule mod_headers.c>
+    Header set Access-Control-Allow-Origin "*"
+    Header set Access-Control-Allow-Methods "GET, POST, OPTIONS, DELETE, PUT"
+    Header set Access-Control-Allow-Headers "Content-Type, Authorization, X-Requested-With"
+</IfModule>
