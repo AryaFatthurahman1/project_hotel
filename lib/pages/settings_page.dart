@@ -55,17 +55,63 @@ class _SettingsPageState extends State<SettingsPage> {
     }
   }
 
+  void _showPriceList() {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: const Color(0xFF1B3022),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(25))),
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(30),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text('DAFTAR HARGA LAYANAN', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2)),
+              const SizedBox(height: 20),
+              _buildPriceRow('Emerald Suite', 'Rp 2.500.000'),
+              _buildPriceRow('Sapphire Room', 'Rp 1.850.000'),
+              _buildPriceRow('Ruby Boutique', 'Rp 950.000'),
+              _buildPriceRow('Spa & Wellness', 'Rp 500.000'),
+              _buildPriceRow('Dinner Package', 'Rp 750.000'),
+              const SizedBox(height: 20),
+              SizedBox(
+                width: double.infinity,
+                child: TextButton(onPressed: () => Navigator.pop(context), child: const Text('TUTUP', style: TextStyle(color: Colors.white24))),
+              ),
+            ],
+          ),
+        );
+      }
+    );
+  }
+
+  Widget _buildPriceRow(String name, String price) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(name, style: const TextStyle(color: Colors.white, fontSize: 13)),
+          Text(price, style: const TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, fontSize: 13)),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFF0F1B14),
       appBar: AppBar(
-        title: const Text('PENGATURAN & STATISTIK', style: TextStyle(letterSpacing: 2, fontSize: 14, fontWeight: FontWeight.bold)),
+        title: const Text('PROFIL & ANALITIK', style: TextStyle(letterSpacing: 2, fontSize: 13, fontWeight: FontWeight.bold)),
         backgroundColor: const Color(0xFF1B3022),
         elevation: 0,
         foregroundColor: const Color(0xFFD4AF37),
+        centerTitle: true,
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         child: Column(
           children: [
             const SizedBox(height: 30),
@@ -108,24 +154,65 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 15),
             Text(
               widget.user.name.toUpperCase(),
-              style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold, letterSpacing: 2),
+              style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.w900, letterSpacing: 3),
             ),
             Text(
               widget.user.email,
-              style: const TextStyle(color: Colors.white38, fontSize: 12),
+              style: const TextStyle(color: Colors.white38, fontSize: 13, letterSpacing: 1),
+            ),
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+              decoration: BoxDecoration(color: const Color(0xFFD4AF37).withOpacity(0.15), borderRadius: BorderRadius.circular(20)),
+              child: Text(
+                widget.user.role?.toUpperCase() ?? 'MEMBER',
+                style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2),
+              ),
             ),
 
-            const SizedBox(height: 40),
+            const SizedBox(height: 35),
+            
+            // Stats Row
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: [
+                  Expanded(child: _buildSimpleStat('LOYALTY', 'GOLD')),
+                  const SizedBox(width: 15),
+                  Expanded(child: _buildSimpleStat('POINTS', '1,250')),
+                  const SizedBox(width: 15),
+                  Expanded(child: _buildSimpleStat('SESSIONS', '24')),
+                ],
+              ),
+            ),
 
-            // Statistics Section
+            const SizedBox(height: 15),
+            
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: OutlinedButton.icon(
+                onPressed: _showPriceList,
+                icon: const Icon(Icons.list_alt, color: Color(0xFFD4AF37), size: 16),
+                label: const Text('LIHAT DAFTAR HARGA LAYANAN', style: TextStyle(color: Color(0xFFD4AF37), fontSize: 10, fontWeight: FontWeight.bold)),
+                style: OutlinedButton.styleFrom(
+                  side: BorderSide(color: const Color(0xFFD4AF37).withOpacity(0.3)),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  minimumSize: const Size(double.infinity, 45),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 30),
+
+            // Statistics Chart Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(25),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1B3022),
-                  borderRadius: BorderRadius.circular(15),
-                  border: Border.all(color: Colors.white10),
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -133,27 +220,33 @@ class _SettingsPageState extends State<SettingsPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('STATISTIK PEMESANAN', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 1)),
-                        const Icon(Icons.bar_chart, color: Color(0xFFD4AF37), size: 18),
+                        const Text('ANALISIS AKTIVITAS', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 12)),
+                        const Icon(Icons.show_chart, color: Color(0xFFD4AF37), size: 18),
                       ],
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 10),
+                    const Text('Perkembangan pemesanan dalam 5 bulan terakhir', style: TextStyle(color: Colors.white24, fontSize: 10)),
+                    const SizedBox(height: 35),
                     SizedBox(
-                      height: 200,
-                      child: BarChart(
-                        BarChartData(
-                          alignment: BarChartAlignment.spaceAround,
-                          maxY: 20,
-                          barTouchData: BarTouchData(enabled: false),
+                      height: 180,
+                      child: LineChart(
+                        LineChartData(
+                          gridData: const FlGridData(show: false),
                           titlesData: FlTitlesData(
-                            show: true,
                             bottomTitles: AxisTitles(
                               sideTitles: SideTitles(
                                 showTitles: true,
                                 getTitlesWidget: (value, meta) {
                                   const titles = ['JAN', 'FEB', 'MAR', 'APR', 'MEI'];
-                                  return Text(titles[value.toInt() % titles.length], style: const TextStyle(color: Colors.white38, fontSize: 10));
+                                  if (value % 1 == 0 && value >= 0 && value < 5) {
+                                    return Padding(
+                                      padding: const EdgeInsets.only(top: 10),
+                                      child: Text(titles[value.toInt()], style: const TextStyle(color: Colors.white24, fontSize: 9)),
+                                    );
+                                  }
+                                  return const Text('');
                                 },
+                                interval: 1,
                               ),
                             ),
                             leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
@@ -161,12 +254,25 @@ class _SettingsPageState extends State<SettingsPage> {
                             rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                           ),
                           borderData: FlBorderData(show: false),
-                          barGroups: [
-                            BarChartGroupData(x: 0, barRods: [BarChartRodData(toY: 8, color: const Color(0xFFD4AF37), width: 15)]),
-                            BarChartGroupData(x: 1, barRods: [BarChartRodData(toY: 15, color: const Color(0xFFD4AF37), width: 15)]),
-                            BarChartGroupData(x: 2, barRods: [BarChartRodData(toY: 10, color: const Color(0xFFD4AF37), width: 15)]),
-                            BarChartGroupData(x: 3, barRods: [BarChartRodData(toY: 18, color: const Color(0xFFD4AF37), width: 15)]),
-                            BarChartGroupData(x: 4, barRods: [BarChartRodData(toY: 12, color: const Color(0xFFD4AF37), width: 15)]),
+                          lineBarsData: [
+                            LineChartBarData(
+                              spots: [
+                                const FlSpot(0, 3),
+                                const FlSpot(1, 5),
+                                const FlSpot(2, 4),
+                                const FlSpot(3, 8),
+                                const FlSpot(4, 6),
+                              ],
+                              isCurved: true,
+                              color: const Color(0xFFD4AF37),
+                              barWidth: 3,
+                              isStrokeCapRound: true,
+                              dotData: const FlDotData(show: true),
+                              belowBarData: BarAreaData(
+                                show: true,
+                                color: const Color(0xFFD4AF37).withOpacity(0.1),
+                              ),
+                            ),
                           ],
                         ),
                       ),
@@ -178,59 +284,60 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const SizedBox(height: 25),
 
-            // Date & Notes Section
+            // Notes Section
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: Container(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.all(25),
                 decoration: BoxDecoration(
                   color: const Color(0xFF1B3022),
-                  borderRadius: BorderRadius.circular(15),
+                  borderRadius: BorderRadius.circular(25),
+                  border: Border.all(color: Colors.white.withOpacity(0.05)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('CATATAN PERJALANAN', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 1)),
+                    const Text('CATATAN PERJALANAN', style: TextStyle(color: Color(0xFFD4AF37), fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 12)),
                     const SizedBox(height: 20),
                     ListTile(
                       contentPadding: EdgeInsets.zero,
-                      title: const Text('TANGGAL RENCANA', style: TextStyle(color: Colors.white60, fontSize: 10)),
-                      subtitle: Text(DateFormat('EEEE, d MMMM yyyy').format(_selectedDate), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                      title: const Text('TANGGAL RENCANA BERIKUTNYA', style: TextStyle(color: Colors.white38, fontSize: 10, letterSpacing: 1)),
+                      subtitle: Text(DateFormat('EEEE, d MMMM yyyy').format(_selectedDate), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
                       trailing: IconButton(
-                        icon: const Icon(Icons.calendar_today, color: Color(0xFFD4AF37), size: 20),
+                        icon: const Icon(Icons.calendar_month, color: Color(0xFFD4AF37), size: 22),
                         onPressed: () => _selectDate(context),
                       ),
                     ),
-                    const Divider(color: Colors.white10),
-                    const SizedBox(height: 10),
+                    const Divider(color: Colors.white10, height: 30),
                     TextFormField(
                       controller: _noteController,
                       style: const TextStyle(color: Colors.white, fontSize: 13),
-                      maxLines: 4,
+                      maxLines: 3,
                       decoration: InputDecoration(
-                        hintText: 'Tuliskan catatan atau keinginan Anda di sini...',
+                        hintText: 'Tuliskan preferensi kamar atau akomodasi...',
                         hintStyle: const TextStyle(color: Colors.white24, fontSize: 12),
                         filled: true,
-                        fillColor: Colors.black26,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
+                        fillColor: Colors.black.withOpacity(0.2),
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
                       ),
                     ),
                     const SizedBox(height: 20),
                     SizedBox(
                       width: double.infinity,
-                      height: 45,
+                      height: 50,
                       child: ElevatedButton(
                         onPressed: () {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Catatan berhasil disimpan')),
+                            const SnackBar(content: Text('Catatan Anda telah diperbarui')),
                           );
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFFD4AF37),
                           foregroundColor: Colors.black,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          elevation: 0,
                         ),
-                        child: const Text('SIMPAN PERUBAHAN', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1)),
+                        child: const Text('UPDATE PROFIL & CATATAN', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2, fontSize: 11)),
                       ),
                     ),
                   ],
@@ -240,6 +347,24 @@ class _SettingsPageState extends State<SettingsPage> {
             const SizedBox(height: 50),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildSimpleStat(String label, String val) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 20),
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(0.03),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: Colors.white.withOpacity(0.05)),
+      ),
+      child: Column(
+        children: [
+          Text(val, style: const TextStyle(color: Color(0xFFD4AF37), fontSize: 18, fontWeight: FontWeight.w900, letterSpacing: 1)),
+          const SizedBox(height: 5),
+          Text(label, style: const TextStyle(color: Colors.white24, fontSize: 9, letterSpacing: 2, fontWeight: FontWeight.bold)),
+        ],
       ),
     );
   }

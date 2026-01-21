@@ -128,6 +128,14 @@ class ApiService {
     return post("/insert_data", data: data);
   }
 
+  static Future<Map<String, dynamic>> deleteBooking(int bookingId, String token) async {
+    return post("/delete_data", data: {
+      "type": "booking",
+      "id": bookingId,
+      "token": token
+    });
+  }
+
   // New: Method untuk mengecek koneksi API secara langsung
   static Future<Map<String, dynamic>> checkApiStatus() async {
     try {
