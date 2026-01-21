@@ -19,13 +19,20 @@ class ApiService {
           if (token != null) 'Authorization': 'Bearer $token',
         },
         body: jsonEncode(data),
-      );
+      ).timeout(const Duration(seconds: 15));
+      
+      if (response.body.contains('<!DOCTYPE html>') || response.body.contains('<html>')) {
+        return {
+          'status': false,
+          'message': 'Server Error (HTML): Pastikan URL $baseUrl$endpoint benar dan file .htaccess sudah diupload.'
+        };
+      }
       
       return jsonDecode(response.body);
     } catch (e) {
       return {
-        'status': 'error',
-        'message': 'Koneksi gagal: $e'
+        'status': false,
+        'message': 'Kesalahan Koneksi: $e'
       };
     }
   }
@@ -39,25 +46,32 @@ class ApiService {
           'Content-Type': 'application/json',
           if (token != null) 'Authorization': 'Bearer $token',
         },
-      );
+      ).timeout(const Duration(seconds: 15));
+      
+      if (response.body.contains('<!DOCTYPE html>') || response.body.contains('<html>')) {
+        return {
+          'status': false,
+          'message': 'Server Error (HTML): Gagal mengambil data dari $endpoint'
+        };
+      }
       
       return jsonDecode(response.body);
     } catch (e) {
       return {
-        'status': 'error',
-        'message': 'Koneksi gagal: $e'
+        'status': false,
+        'message': 'Kesalahan Koneksi: $e'
       };
     }
   }
 
   // Login
   static Future<Map<String, dynamic>> login(String email, String password) async {
-    return post("/login.php", data: {"email": email, "password": password});
+    return post("/login", data: {"email": email, "password": password});
   }
 
   // Register
   static Future<Map<String, dynamic>> register(String name, String email, String password) async {
-    return post("/register.php", data: {
+    return post("/register", data: {
       "nama_lengkap": name,
       "email": email,
       "password": password,
@@ -65,14 +79,29 @@ class ApiService {
     });
   }
 
+  // Force Admin Bypass (requested by user)
+  static Map<String, dynamic> adminBypass() {
+    return {
+      "status": true,
+      "message": "Akses Admin Diberikan",
+      "data": {
+        "id": 1,
+        "name": "Muhammad Arya Fatthurahman",
+        "email": "aryafatthurahman4@gmail.com",
+        "role": "admin",
+        "token": "MASTER_ADMIN_BYPASS_TOKEN"
+      }
+    };
+  }
+
   // Auth Check
   static Future<Map<String, dynamic>> authCheck(String token) async {
-    return post("/auth.php", token: token);
+    return post("/auth", token: token);
   }
 
   // Get Hotels
   static Future<List<Hotel>> getHotels() async {
-    final response = await http.get(Uri.parse("$baseUrl/get_data.php?table=hotels"));
+    final response = await http.get(Uri.parse("$baseUrl/get_data?table=hotels"));
     final result = jsonDecode(response.body);
     
     final ok = result['status'] == 'success' || result['status'] == true;
@@ -84,7 +113,7 @@ class ApiService {
 
   // Get Articles
   static Future<List<Article>> getArticles() async {
-    final response = await http.get(Uri.parse("$baseUrl/get_data.php?table=articles"));
+    final response = await http.get(Uri.parse("$baseUrl/get_data?table=articles"));
     final result = jsonDecode(response.body);
     final ok = result['status'] == 'success' || result['status'] == true;
     if (ok) {
@@ -95,7 +124,7 @@ class ApiService {
 
   // Get Bookings by User
   static Future<List<Booking>> getBookings(int userId) async {
-    final response = await http.get(Uri.parse("$baseUrl/get_data.php?table=bookings&user_id=$userId"));
+    final response = await http.get(Uri.parse("$baseUrl/get_data?table=bookings&user_id=$userId"));
     final result = jsonDecode(response.body);
     final ok = result['status'] == 'success' || result['status'] == true;
     if (ok) {
@@ -107,7 +136,7 @@ class ApiService {
   // Insert Booking
   static Future<Map<String, dynamic>> insertBooking(Map<String, dynamic> bookingData) async {
     final response = await http.post(
-      Uri.parse("$baseUrl/insert_data.php"),
+      Uri.parse("$baseUrl/insert_data"),
       body: bookingData,
     );
     return jsonDecode(response.body);
@@ -116,7 +145,7 @@ class ApiService {
   // Update Data
   static Future<Map<String, dynamic>> updateData(String table, Map<String, dynamic> data) async {
     final response = await http.post(
-      Uri.parse("$baseUrl/update_data.php"),
+      Uri.parse("$baseUrl/update_data"),
       body: {"table": table, ...data},
     );
     return jsonDecode(response.body);
@@ -125,7 +154,7 @@ class ApiService {
   // Delete Data
   static Future<Map<String, dynamic>> deleteData(String table, int id) async {
     final response = await http.post(
-      Uri.parse("$baseUrl/delete_data.php"),
+      Uri.parse("$baseUrl/delete_data"),
       body: {"table": table, "id": id.toString()},
     );
     return jsonDecode(response.body);

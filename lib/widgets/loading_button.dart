@@ -6,16 +6,17 @@ class LoadingButton extends StatelessWidget {
   final Widget child;
 
   const LoadingButton({
-    Key? key,
+    super.key,
     required this.onPressed,
     required this.isLoading,
     required this.child,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: isLoading ? null : onPressed,
+      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
       child: isLoading
           ? SizedBox(
               height: 18,
@@ -23,7 +24,6 @@ class LoadingButton extends StatelessWidget {
               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
             )
           : child,
-      style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16)),
     );
   }
 }

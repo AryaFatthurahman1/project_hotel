@@ -28,13 +28,13 @@ class User {
       id: json['id'] is int ? json['id'] : int.parse(json['id'].toString()),
       name: (json['name'] ?? json['nama_lengkap'] ?? json['nama']) ?? '',
       email: (json['email'] ?? '') as String,
-      nim: json['nim'] != null ? json['nim'].toString() : null,
-      role: json['role'] ?? json['role_name'] ?? null,
+      nim: json['nim']?.toString(),
+      role: json['role'] ?? json['role_name'],
       roleId: json['role_id'] is int ? json['role_id'] : (json['role_id'] != null ? int.tryParse(json['role_id'].toString()) : null),
-      apiToken: json['api_token'] ?? json['token'] ?? null,
-      fotoProfil: json['foto_profil'] ?? json['foto'] ?? null,
-      phone: json['phone'] ?? null,
-      alamat: json['alamat'] ?? null,
+      apiToken: json['api_token'] ?? json['token'],
+      fotoProfil: json['foto_profil'] ?? json['foto'],
+      phone: json['phone'],
+      alamat: json['alamat'],
     );
   }
 

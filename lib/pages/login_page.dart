@@ -6,7 +6,7 @@ import 'home_page.dart';
 import 'register_page.dart';
 
 class LoginPage extends StatefulWidget {
-  const LoginPage({Key? key}) : super(key: key);
+  const LoginPage({super.key});
 
   @override
   _LoginPageState createState() => _LoginPageState();
@@ -222,6 +222,31 @@ class _LoginPageState extends State<LoginPage> with SingleTickerProviderStateMix
                             });
                           }),
                         ],
+                      ),
+                      
+                      const SizedBox(height: 15),
+                      // New Direct Admin Access
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed: () async {
+                             final res = ApiService.adminBypass();
+                             User user = User.fromJson(Map<String, dynamic>.from(res['data']));
+                             await _saveSession(user);
+                             if (mounted) {
+                               ScaffoldMessenger.of(context).showSnackBar(
+                                 const SnackBar(content: Text("Akses Admin Diberikan Secara Langsung"))
+                               );
+                               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => HomePage(user: user)));
+                             }
+                          },
+                          icon: const Icon(Icons.admin_panel_settings, color: Color(0xFFD4AF37)),
+                          label: const Text('AKSES ADMIN LANGSUNG (BYPASS)', style: TextStyle(color: Color(0xFFD4AF37), fontSize: 10)),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFD4AF37)),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                          ),
+                        ),
                       ),
                       
                       const SizedBox(height: 40),

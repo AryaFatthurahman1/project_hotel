@@ -7,7 +7,7 @@ import '../models/user_model.dart';
 
 class SettingsPage extends StatefulWidget {
   final User user;
-  const SettingsPage({Key? key, required this.user}) : super(key: key);
+  const SettingsPage({super.key, required this.user});
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();

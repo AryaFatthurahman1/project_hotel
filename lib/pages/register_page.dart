@@ -6,7 +6,7 @@ import '../models/user_model.dart';
 import 'home_page.dart';
 
 class RegisterPage extends StatefulWidget {
-  const RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({super.key});
 
   @override
   _RegisterPageState createState() => _RegisterPageState();
@@ -174,7 +174,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 40),
 
                   // Card Register
-                  Container(
+                  SizedBox(
                     width: double.infinity,
                     child: Form(
                       key: _formKey,

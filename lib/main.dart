@@ -3,14 +3,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'models/user_model.dart';
 import 'pages/login_page.dart';
 import 'pages/home_page.dart';
-import 'pages/test_login.dart';
 
 void main() {
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   Future<User?> _getCurrentUser() async {
     final prefs = await SharedPreferences.getInstance();
@@ -31,7 +30,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'HotelStay - Hotel Booking App', // Poin c
+      title: 'HotelStay - Hotel Booking App',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -42,18 +41,19 @@ class MyApp extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Scaffold(
+              backgroundColor: const Color(0xFF0F1B14),
               body: Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Image.network(
-                      'https://picsum.photos/seed/hotellogo/150/150',
-                      height: 150,
-                    ),
+                  children: const [
+                    Icon(Icons.auto_awesome, color: Color(0xFFD4AF37), size: 80),
+                    SizedBox(height: 30),
+                    CircularProgressIndicator(color: Color(0xFFD4AF37)),
                     SizedBox(height: 20),
-                    CircularProgressIndicator(),
-                    SizedBox(height: 10),
-                    Text('Loading...'),
+                    Text(
+                      'THE EMERALD IMPERIAL',
+                      style: TextStyle(color: Colors.white, letterSpacing: 4, fontWeight: FontWeight.w200),
+                    ),
                   ],
                 ),
               ),
@@ -67,9 +67,6 @@ class MyApp extends StatelessWidget {
           return const LoginPage();
         },
       ),
-      routes: {
-        '/test': (context) => const TestLoginPage(),
-      },
     );
   }
 }

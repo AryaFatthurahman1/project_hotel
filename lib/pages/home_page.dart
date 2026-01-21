@@ -11,7 +11,7 @@ import 'settings_page.dart';
 class HomePage extends StatefulWidget {
   final User user;
   
-  const HomePage({Key? key, required this.user}) : super(key: key);
+  const HomePage({super.key, required this.user});
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -332,7 +332,7 @@ class _HomePageState extends State<HomePage> {
                   Text(hotel.description!),
                 ],
                 SizedBox(height: 15),
-                Container(
+                SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
                     onPressed: () {
@@ -340,11 +340,11 @@ class _HomePageState extends State<HomePage> {
                         SnackBar(content: Text('Booking ${hotel.name} - Fitur coming soon!')),
                       );
                     },
-                    child: Text('Booking Sekarang'),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue[600],
                       foregroundColor: Colors.white,
                     ),
+                    child: Text('Booking Sekarang'),
                   ),
                 ),
               ],

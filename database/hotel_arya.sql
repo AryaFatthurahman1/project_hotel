@@ -16,6 +16,7 @@ CREATE TABLE users (
     alamat TEXT,
     foto_profil VARCHAR(255) DEFAULT NULL,
     role ENUM('user', 'admin') DEFAULT 'user',
+    api_token VARCHAR(255) DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
