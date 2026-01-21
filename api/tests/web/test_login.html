@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Login API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>Test Login API</h1>
+    
+    <h2>Test with arya/123</h2>
+    <input type="text" id="email" value="arya" placeholder="Email/Username">
+    <input type="password" id="password" value="123" placeholder="Password">
+    <button onclick="testLogin()">Test Login</button>
+    
+    <h2>Test with arya@unsada.ac.id/123</h2>
+    <input type="text" id="email2" value="arya@unsada.ac.id" placeholder="Email/Username">
+    <input type="password" id="password2" value="123" placeholder="Password">
+    <button onclick="testLogin2()">Test Login 2</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/test_login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+                
+                const data = await response.json();
+                resultDiv.textContent = `Status: ${response.status}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+        
+        async function testLogin2() {
+            const email = document.getElementById('email2').value;
+            const password = document.getElementById('password2').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:8080/api/test_login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+                
+                const data = await response.json();
+                resultDiv.textContent = `Status: ${response.status}\n\nResponse:\n${JSON.stringify(data, null, 2)}`;
+            } catch (error) {
+                resultDiv.textContent = `Error: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

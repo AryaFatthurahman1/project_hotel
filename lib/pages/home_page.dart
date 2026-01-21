@@ -1,0 +1,551 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import '../services/api_service.dart';
+import '../models/user_model.dart';
+import '../models/hotel.dart';
+import '../models/article.dart';
+import '../models/booking.dart';
+import 'login_page.dart';
+
+class HomePage extends StatefulWidget {
+  final User user;
+  
+  const HomePage({Key? key, required this.user}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  int _currentIndex = 0;
+  List<Hotel> _hotels = [];
+  List<Article> _articles = [];
+  List<Booking> _bookings = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    try {
+      final hotels = await ApiService.getHotels();
+      final articles = await ApiService.getArticles();
+      final bookings = await ApiService.getBookings(widget.user.id);
+      
+      setState(() {
+        _hotels = hotels;
+        _articles = articles;
+        _bookings = bookings;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() => _isLoading = false);
+      _showMessage('Error', 'Gagal memuat data: $e');
+    }
+  }
+
+  void _showMessage(String title, String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          )
+        ],
+      )
+    );
+  }
+
+  Future<void> _logout() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (context) => const LoginPage()),
+      (route) => false,
+    );
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Berhasil logout')),
+    );
+  }
+
+  // 5 Menu Utama
+  List<Widget> _buildPages() {
+    return [
+      _buildHomePage(),
+      _buildHotelsPage(),
+      _buildBookingsPage(),
+      _buildArticlesPage(),
+      _buildProfilePage(),
+    ];
+  }
+
+  // Menu 1: Home
+  Widget _buildHomePage() {
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Container dengan Artikel (Poin d, e)
+          Container(
+            margin: EdgeInsets.all(16),
+            padding: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                colors: [Colors.blue[400]!, Colors.blue[600]!],
+              ),
+              borderRadius: BorderRadius.circular(15),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  'Selamat Datang, ${widget.user.name}!',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Temukan hotel impian Anda',
+                  style: TextStyle(color: Colors.white70),
+                ),
+              ],
+            ),
+          ),
+          
+          // Artikel Section
+          if (_articles.isNotEmpty) ...[
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'Artikel Terbaru',
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                ),
+              ),
+            ),
+            SizedBox(height: 10),
+            Container(
+              height: 200,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: _articles.length,
+                itemBuilder: (context, index) {
+                  final article = _articles[index];
+                  return Container(
+                    width: 300,
+                    margin: EdgeInsets.symmetric(horizontal: 8),
+                    child: Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (article.imageUrl != null)
+                              Image.network(
+                                article.imageUrl!,
+                                height: 80,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
+                            SizedBox(height: 10),
+                            Text(
+                              article.title,
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            if (article.content != null)
+                              Expanded(
+                                child: Text(
+                                  article.content!,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            SizedBox(height: 20),
+          ],
+          
+          // Hotel Preview
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Hotel Rekomendasi',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+          SizedBox(height: 10),
+          ..._hotels.take(3).map((hotel) => _buildHotelCard(hotel)),
+        ],
+      ),
+    );
+  }
+
+  // Menu 2: Hotels (List Data - Poin f)
+  Widget _buildHotelsPage() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'Daftar Hotel',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: _isLoading 
+            ? Center(child: CircularProgressIndicator())
+            : ListView.builder(
+                itemCount: _hotels.length,
+                itemBuilder: (context, index) {
+                  return _buildHotelCard(_hotels[index]);
+                },
+              ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildHotelCard(Hotel hotel) {
+    return Card(
+      margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: Column(
+        children: [
+          if (hotel.imageUrl != null)
+            Image.network(
+              hotel.imageUrl!,
+              height: 200,
+              width: double.infinity,
+              fit: BoxFit.cover,
+            ),
+          Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  hotel.name,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 5),
+                Row(
+                  children: [
+                    Icon(Icons.location_on, size: 16),
+                    SizedBox(width: 5),
+                    Text(hotel.location),
+                  ],
+                ),
+                SizedBox(height: 5),
+                Text(
+                  'Rp ${hotel.price.toStringAsFixed(0)}/malam',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.green[700],
+                  ),
+                ),
+                if (hotel.description != null) ...[
+                  SizedBox(height: 10),
+                  Text(hotel.description!),
+                ],
+                SizedBox(height: 15),
+                Container(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Booking ${hotel.name} - Fitur coming soon!')),
+                      );
+                    },
+                    child: Text('Booking Sekarang'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[600],
+                      foregroundColor: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Menu 3: Bookings
+  Widget _buildBookingsPage() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'Booking Saya',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: _bookings.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.book_online, size: 80, color: Colors.grey),
+                    SizedBox(height: 10),
+                    Text('Belum ada booking', style: TextStyle(color: Colors.grey)),
+                  ],
+                ),
+              )
+            : ListView.builder(
+                itemCount: _bookings.length,
+                itemBuilder: (context, index) {
+                  final booking = _bookings[index];
+                  return Card(
+                    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ListTile(
+                      leading: Icon(Icons.hotel),
+                      title: Text(booking.hotelName ?? 'Hotel'),
+                      subtitle: Text(
+                        'Check-in: ${booking.checkin?.toString().split(' ')[0] ?? '-'}\n'
+                        'Status: ${booking.status}',
+                      ),
+                      trailing: Container(
+                        padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: booking.status == 'confirmed' ? Colors.green : Colors.orange,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          booking.status,
+                          style: TextStyle(color: Colors.white, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+        ),
+      ],
+    );
+  }
+
+  // Menu 4: Articles
+  Widget _buildArticlesPage() {
+    return Column(
+      children: [
+        Padding(
+          padding: EdgeInsets.all(16),
+          child: Text(
+            'Artikel & Tips',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+        ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: _articles.length,
+            itemBuilder: (context, index) {
+              final article = _articles[index];
+              return Card(
+                margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Padding(
+                  padding: EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (article.imageUrl != null)
+                        Image.network(
+                          article.imageUrl!,
+                          height: 150,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      SizedBox(height: 10),
+                      Text(
+                        article.title,
+                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      ),
+                      if (article.content != null) ...[
+                        SizedBox(height: 10),
+                        Text(
+                          article.content!,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                      SizedBox(height: 10),
+                      TextButton(
+                        onPressed: () {
+                          _showMessage(article.title, article.content ?? 'Konten tidak tersedia');
+                        },
+                        child: Text('Baca Selengkapnya'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  // Menu 5: Profile
+  Widget _buildProfilePage() {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Container Profile
+            Container(
+              padding: EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.blue[50],
+                borderRadius: BorderRadius.circular(15),
+              ),
+              child: Column(
+                children: [
+                  CircleAvatar(
+                    radius: 50,
+                    backgroundColor: Colors.blue[600],
+                    child: Text(
+                      widget.user.name.isNotEmpty ? widget.user.name[0].toUpperCase() : '-',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: 15),
+                  Text(
+                    widget.user.name,
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  Text(widget.user.email),
+                  SizedBox(height: 5),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[600],
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      (widget.user.role ?? '').isNotEmpty ? (widget.user.role ?? '').toUpperCase() : 'USER',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            SizedBox(height: 30),
+            
+            // Menu Items
+            Container(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: Icon(Icons.person),
+                    title: Text('Edit Profile'),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Fitur coming soon!')),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.settings),
+                    title: Text('Settings'),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Fitur coming soon!')),
+                      );
+                    },
+                  ),
+                  ListTile(
+                    leading: Icon(Icons.help),
+                    title: Text('Help & Support'),
+                    trailing: Icon(Icons.arrow_forward_ios),
+                    onTap: () {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Fitur coming soon!')),
+                      );
+                    },
+                  ),
+                  Divider(),
+                  ListTile(
+                    leading: Icon(Icons.logout, color: Colors.red),
+                    title: Text('Logout', style: TextStyle(color: Colors.red)),
+                    onTap: _logout,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: const Color(0xFF0F1B14),
+      appBar: AppBar(
+        title: const Text('ARYA HOTEL', style: TextStyle(letterSpacing: 2, fontWeight: FontWeight.bold, fontSize: 16)),
+        backgroundColor: const Color(0xFF1B3022),
+        elevation: 0,
+        foregroundColor: const Color(0xFFD4AF37),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, size: 20),
+            onPressed: () => _logout(),
+          ),
+        ],
+      ),
+      body: _buildPages()[_currentIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) => setState(() => _currentIndex = index),
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: const Color(0xFF1B3022),
+        selectedItemColor: const Color(0xFFD4AF37),
+        unselectedItemColor: Colors.white24,
+        selectedLabelStyle: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontSize: 10),
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home_outlined), activeIcon: Icon(Icons.home), label: 'HOME'),
+          BottomNavigationBarItem(icon: Icon(Icons.hotel_outlined), activeIcon: Icon(Icons.hotel), label: 'HOTEL'),
+          BottomNavigationBarItem(icon: Icon(Icons.bookmark_border), activeIcon: Icon(Icons.bookmark), label: 'PESANAN'),
+          BottomNavigationBarItem(icon: Icon(Icons.article_outlined), activeIcon: Icon(Icons.article), label: 'ARTIKEL'),
+          BottomNavigationBarItem(icon: Icon(Icons.person_outline), activeIcon: Icon(Icons.person), label: 'PROFIL'),
+        ],
+      ),
+    );
+  }
+}
