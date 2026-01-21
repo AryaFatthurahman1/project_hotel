@@ -6,6 +6,7 @@ import '../models/hotel.dart';
 import '../models/article.dart';
 import '../models/booking.dart';
 import 'login_page.dart';
+import 'settings_page.dart';
 
 class HomePage extends StatefulWidget {
   final User user;
@@ -85,7 +86,7 @@ class _HomePageState extends State<HomePage> {
       _buildHotelsPage(),
       _buildBookingsPage(),
       _buildArticlesPage(),
-      _buildProfilePage(),
+      SettingsPage(user: widget.user),
     ];
   }
 
@@ -412,105 +413,6 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Menu 5: Profile
-  Widget _buildProfilePage() {
-    return SingleChildScrollView(
-      child: Padding(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            // Container Profile
-            Container(
-              padding: EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.blue[50],
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundColor: Colors.blue[600],
-                    child: Text(
-                      widget.user.name.isNotEmpty ? widget.user.name[0].toUpperCase() : '-',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 15),
-                  Text(
-                    widget.user.name,
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  Text(widget.user.email),
-                  SizedBox(height: 5),
-                  Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.blue[600],
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      (widget.user.role ?? '').isNotEmpty ? (widget.user.role ?? '').toUpperCase() : 'USER',
-                      style: TextStyle(color: Colors.white, fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            
-            SizedBox(height: 30),
-            
-            // Menu Items
-            Container(
-              child: Column(
-                children: [
-                  ListTile(
-                    leading: Icon(Icons.person),
-                    title: Text('Edit Profile'),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Fitur coming soon!')),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.settings),
-                    title: Text('Settings'),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Fitur coming soon!')),
-                      );
-                    },
-                  ),
-                  ListTile(
-                    leading: Icon(Icons.help),
-                    title: Text('Help & Support'),
-                    trailing: Icon(Icons.arrow_forward_ios),
-                    onTap: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Fitur coming soon!')),
-                      );
-                    },
-                  ),
-                  Divider(),
-                  ListTile(
-                    leading: Icon(Icons.logout, color: Colors.red),
-                    title: Text('Logout', style: TextStyle(color: Colors.red)),
-                    onTap: _logout,
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
   @override
   Widget build(BuildContext context) {

@@ -12,9 +12,9 @@ date_default_timezone_set('Asia/Jakarta');
 
 class Database {
     public $host = "localhost";
-    public $db_name = "hotel_arya";
-    public $username = "root";
-    public $password = "";
+    public $db_name = "bere9277_db_arya";
+    public $username = "bere9277_user_arya";
+    public $password = "aryafatturahman123";
     public $conn;
 
     public function getConnection() {
