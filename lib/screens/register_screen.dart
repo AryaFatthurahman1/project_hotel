@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:project_hotel1/models/user_model.dart';
-import 'package:project_hotel1/services/auth_service.dart';
+import 'package:project_hotel1/services/api_service.dart';
 import 'package:project_hotel1/utils/colors.dart';
 import 'package:project_hotel1/widgets/custom_button.dart';
 import 'package:project_hotel1/widgets/custom_text_field.dart';
@@ -18,30 +17,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _authService = AuthService();
   bool _isLoading = false;
 
   void _register() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
 
-      final newUser = User(
-        id: DateTime.now().millisecondsSinceEpoch.toString(),
-        fullName: _nameController.text,
-        email: _emailController.text,
-        password: _passwordController.text,
-        phone: _phoneController.text,
+      final res = await ApiService.register(
+        _nameController.text,
+        _emailController.text,
+        _passwordController.text,
+        _phoneController.text,
       );
-
-      final success = await _authService.register(newUser);
 
       setState(() => _isLoading = false);
 
-      if (success) {
+      final ok = (res['status'] == true) || (res['status'] == 'success');
+
+      if (ok) {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Registrasi Berhasil! Silahkan Login.'),
+            content: Text('Registrasi Berhasil!'),
             backgroundColor: AppColors.success,
           ),
         );
@@ -49,8 +46,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
       } else {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Email sudah terdaftar!'),
+          SnackBar(
+            content: Text(
+              res['message'] ?? 'Registrasi Gagal! Silahkan coba lagi.',
+            ),
             backgroundColor: AppColors.error,
           ),
         );

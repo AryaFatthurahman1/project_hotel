@@ -41,7 +41,7 @@ class _FoodMenuScreenState extends State<FoodMenuScreen> with SingleTickerProvid
 
     final result = await ApiService.getFoodMenu();
 
-    if (result['success'] == true && result['data'] != null) {
+    if (result['status'] == true && result['data'] != null) {
       setState(() {
         _allFoods = (result['data'] as List)
             .map((e) => FoodItem.fromJson(e))

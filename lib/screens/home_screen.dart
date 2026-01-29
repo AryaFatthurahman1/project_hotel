@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:project_hotel1/screens/login_screen.dart';
 import 'package:project_hotel1/screens/hotel_list_screen.dart';
@@ -6,6 +7,7 @@ import 'package:project_hotel1/screens/article_screen.dart';
 import 'package:project_hotel1/screens/food_menu_screen.dart';
 import 'package:project_hotel1/screens/profile_screen.dart';
 import 'package:project_hotel1/screens/admin_dashboard_screen.dart';
+import 'package:project_hotel1/screens/booking_list_screen.dart';
 import 'package:project_hotel1/services/auth_service.dart';
 import 'package:project_hotel1/utils/colors.dart';
 
@@ -17,7 +19,6 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final AuthService _authService = AuthService();
   String _userName = "User";
   int _selectedIndex = 0;
 
@@ -28,10 +29,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _loadUser() async {
-    final user = await _authService.getCurrentUser();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.user ?? await authService.getCurrentUser();
     if (user != null) {
       setState(() {
-        _userName = user.fullName;
+        _userName = user.name;
       });
     }
   }
@@ -57,7 +59,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await _authService.logout();
+              final authService = Provider.of<AuthService>(
+                context,
+                listen: false,
+              );
+              await authService.logout();
               if (!mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,
@@ -241,8 +247,18 @@ class _HomeScreenState extends State<HomeScreen> {
       {'icon': Icons.hotel, 'label': 'Daftar Hotel', 'color': Colors.blue, 'screen': const HotelListScreen()},
       {'icon': Icons.restaurant_menu, 'label': 'Makanan', 'color': Colors.orange, 'screen': const FoodMenuScreen()},
       {'icon': Icons.article, 'label': 'Artikel', 'color': Colors.green, 'screen': const ArticleScreen()},
-      {'icon': Icons.calendar_today, 'label': 'Reservasi', 'color': Colors.purple, 'screen': null},
-      {'icon': Icons.history, 'label': 'Riwayat', 'color': Colors.teal, 'screen': null},
+      {
+        'icon': Icons.calendar_today,
+        'label': 'Reservasi',
+        'color': Colors.purple,
+        'screen': const BookingListScreen(),
+      },
+      {
+        'icon': Icons.history,
+        'label': 'Riwayat',
+        'color': Colors.teal,
+        'screen': const BookingListScreen(),
+      },
       {'icon': Icons.person, 'label': 'Profil', 'color': Colors.red, 'screen': const ProfileScreen()},
     ];
 

@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:project_hotel1/services/api_service.dart';
 import 'package:project_hotel1/utils/colors.dart';
 
@@ -28,10 +26,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   void _loadStats() async {
     try {
-      final response = await http.get(Uri.parse('${ApiService.baseUrl}/dashboard.php'));
-      final result = jsonDecode(response.body);
+      final result = await ApiService.get("/dashboard");
 
-      if (result['success'] == true) {
+      if (result['status'] == true) {
         setState(() {
           _stats = result['data'];
           _isLoading = false;
@@ -40,6 +37,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
         setState(() => _isLoading = false);
       }
     } catch (e) {
+      debugPrint("Error loading stats: $e");
       setState(() => _isLoading = false);
       // Fallback data for demo if API fails
       _stats = {

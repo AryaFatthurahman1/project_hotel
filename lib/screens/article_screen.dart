@@ -25,21 +25,31 @@ class _ArticleScreenState extends State<ArticleScreen> {
   void _loadArticles() async {
     setState(() => _isLoading = true);
 
-    Map<String, dynamic> result;
-    if (_selectedCategory == 'all') {
-      result = await ApiService.getArticles();
-    } else {
-      result = await ApiService.getArticlesByCategory(_selectedCategory);
-    }
+    try {
+      final List<Article> allArticles = await ApiService.getArticles();
 
-    if (result['success'] == true && result['data'] != null) {
-      setState(() {
-        _articles = (result['data'] as List)
-            .map((e) => Article.fromJson(e))
-            .toList();
-      });
-    } else {
-      // Use sample data if API fails
+      if (allArticles.isNotEmpty) {
+        setState(() {
+          if (_selectedCategory == 'all') {
+            _articles = allArticles;
+          } else {
+            _articles = allArticles
+                .where(
+                  (a) =>
+                      a.category.toLowerCase() ==
+                      _selectedCategory.toLowerCase(),
+                )
+                .toList();
+          }
+        });
+      } else {
+        // Use sample data if API returns empty
+        setState(() {
+          _articles = _getSampleArticles();
+        });
+      }
+    } catch (e) {
+      debugPrint("Error loading articles: $e");
       setState(() {
         _articles = _getSampleArticles();
       });

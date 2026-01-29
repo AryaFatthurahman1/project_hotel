@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:project_hotel1/screens/home_screen.dart';
 import 'package:project_hotel1/screens/register_screen.dart';
+import 'package:project_hotel1/services/api_service.dart';
 import 'package:project_hotel1/services/auth_service.dart';
 import 'package:project_hotel1/utils/colors.dart';
 import 'package:project_hotel1/widgets/custom_button.dart';
@@ -17,21 +19,30 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-  final _authService = AuthService();
   bool _isLoading = false;
 
   void _login() async {
     if (_formKey.currentState!.validate()) {
       setState(() => _isLoading = true);
       
-      final user = await _authService.login(
-        _emailController.text,
+      final res = await ApiService.login(
+        _emailController.text.trim(),
         _passwordController.text,
       );
 
       setState(() => _isLoading = false);
 
-      if (user != null) {
+      final ok = (res['status'] == true) || (res['status'] == 'success');
+
+      if (ok) {
+        if (!mounted) return;
+        final authService = Provider.of<AuthService>(context, listen: false);
+        // We still need to notify AuthService so HomeScreen works
+        await authService.login(
+          _emailController.text.trim(),
+          _passwordController.text,
+        );
+        
         if (!mounted) return;
         Navigator.pushReplacement(
           context,
@@ -39,10 +50,11 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         if (!mounted) return;
-        // Snackbar
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login Gagal: Email atau Password salah!'),
+          SnackBar(
+            content: Text(
+              res['message'] ?? 'Login Gagal: Email atau Password salah!',
+            ),
             backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),

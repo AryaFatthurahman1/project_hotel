@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:project_hotel1/services/auth_service.dart';
 import 'package:project_hotel1/screens/login_screen.dart';
 import 'package:project_hotel1/utils/colors.dart';
@@ -11,7 +12,6 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final AuthService _authService = AuthService();
   Map<String, dynamic>? _userData;
   bool _isLoading = true;
 
@@ -22,11 +22,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _loadUserData() async {
-    final user = await _authService.getCurrentUser();
+    final authService = Provider.of<AuthService>(context, listen: false);
+    final user = authService.user ?? await authService.getCurrentUser();
+    
     setState(() {
       if (user != null) {
         _userData = {
-          'full_name': user.fullName,
+          'full_name': user.name,
           'email': user.email,
           'phone': user.phone ?? '-',
         };
@@ -56,7 +58,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () async {
               Navigator.pop(ctx);
-              await _authService.logout();
+              final authService = Provider.of<AuthService>(
+                context,
+                listen: false,
+              );
+              await authService.logout();
               if (!mounted) return;
               Navigator.pushAndRemoveUntil(
                 context,

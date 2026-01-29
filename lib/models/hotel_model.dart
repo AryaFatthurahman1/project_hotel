@@ -13,6 +13,11 @@ class Hotel {
   final String roomType;
   final bool isAvailable;
   final int totalRooms;
+  bool isFavorite;
+
+  String get location => city;
+  double get price => pricePerNight;
+  double get stars => rating;
 
   Hotel({
     required this.id,
@@ -29,6 +34,7 @@ class Hotel {
     required this.roomType,
     required this.isAvailable,
     required this.totalRooms,
+    this.isFavorite = false,
   });
 
   factory Hotel.fromJson(Map<String, dynamic> json) {

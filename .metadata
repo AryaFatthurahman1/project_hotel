@@ -30,6 +30,12 @@ migration:
     - platform: web
       create_revision: adc901062556672b4138e18a4dc62a4be8f4b3c2
       base_revision: adc901062556672b4138e18a4dc62a4be8f4b3c2
+<<<<<<< HEAD
+=======
+    - platform: windows
+      create_revision: adc901062556672b4138e18a4dc62a4be8f4b3c2
+      base_revision: adc901062556672b4138e18a4dc62a4be8f4b3c2
+>>>>>>> 30c03fa7cf4dc403b71d85c91d158c310909a7e9
 
   # User provided section
 

@@ -24,6 +24,18 @@ class Article {
   });
 
   factory Article.fromJson(Map<String, dynamic> json) {
+    String rawDate = json['created_at'] ?? '';
+    String formattedDate = json['created_at_formatted'] ?? '';
+
+    if (formattedDate.isEmpty && rawDate.isNotEmpty) {
+      try {
+        DateTime dt = DateTime.parse(rawDate);
+        formattedDate = "${dt.day} ${_getMonthName(dt.month)} ${dt.year}";
+      } catch (e) {
+        formattedDate = rawDate;
+      }
+    }
+
     return Article(
       id: int.tryParse(json['id'].toString()) ?? 0,
       title: json['title'] ?? '',
@@ -33,9 +45,27 @@ class Article {
       author: json['author'] ?? 'Admin',
       category: json['category'] ?? 'news',
       views: int.tryParse(json['views'].toString()) ?? 0,
-      createdAt: json['created_at'] ?? '',
-      createdAtFormatted: json['created_at_formatted'] ?? '',
+      createdAt: rawDate,
+      createdAtFormatted: formattedDate,
     );
+  }
+
+  static String _getMonthName(int month) {
+    const months = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'Mei',
+      'Jun',
+      'Jul',
+      'Agu',
+      'Sep',
+      'Okt',
+      'Nov',
+      'Des',
+    ];
+    return months[month - 1];
   }
 
   String get categoryLabel {
