@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Registration</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .test-data {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="form-container">
+        <h1>🏨 Test Registration</h1>
+        
+        <div class="test-data">
+            <strong>Test Data:</strong><br>
+            Name: Muhammad Arya Fatthurahman<br>
+            Email: aryafatthurahman4@gmail.com<br>
+            Phone: (optional)<br>
+            Password: arya123
+        </div>
+        
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="nama_lengkap">Nama Lengkap *</label>
+                <input type="text" id="nama_lengkap" name="nama_lengkap" value="Muhammad Arya Fatthurahman" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input type="email" id="email" name="email" value="aryafatthurahman4@gmail.com" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Nomor Telepon</label>
+                <input type="tel" id="phone" name="phone" placeholder="08123456789">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Password *</label>
+                <input type="password" id="password" name="password" value="arya123" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password_confirmation">Konfirmasi Password *</label>
+                <input type="password" id="password_confirmation" name="password_confirmation" value="arya123" required>
+            </div>
+            
+            <button type="submit" id="registerBtn">Register</button>
+            <button type="button" onclick="testQuickRegister()">Quick Test (Arya)</button>
+        </form>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('registerForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await registerUser();
+        });
+
+        async function registerUser() {
+            const resultDiv = document.getElementById('result');
+            const registerBtn = document.getElementById('registerBtn');
+            
+            // Get form data
+            const formData = new FormData(document.getElementById('registerForm'));
+            const data = Object.fromEntries(formData);
+            
+            // Validate passwords match
+            if (data.password !== data.password_confirmation) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = 'Password dan konfirmasi password tidak sama!';
+                return;
+            }
+            
+            // Disable button
+            registerBtn.disabled = true;
+            registerBtn.textContent = 'Registering...';
+            resultDiv.className = 'info';
+            resultDiv.textContent = 'Mendaftarkan user...';
+            
+            try {
+                const response = await fetch('http://localhost:8081/test_register.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams(data)
+                });
+                
+                const responseData = await response.json();
+                
+                if (responseData.status === true) {
+                    resultDiv.className = 'success';
+                    resultDiv.textContent = `✅ Registration Successful!\n\n` +
+                        `User ID: ${responseData.data.id}\n` +
+                        `NIM: ${responseData.data.nim}\n` +
+                        `Nama: ${responseData.data.nama_lengkap}\n` +
+                        `Email: ${responseData.data.email}\n` +
+                        `Phone: ${responseData.data.phone || 'Not provided'}\n` +
+                        `Role: ${responseData.data.role}\n` +
+                        `Token: ${responseData.data.token}`;
+                    
+                    // Test auto-login
+                    setTimeout(() => testLogin(responseData.data.email, data.password), 2000);
+                } else {
+                    resultDiv.className = 'error';
+                    resultDiv.textContent = `❌ Registration Failed: ${responseData.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = `❌ Error: ${error.message}`;
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'Register';
+            }
+        }
+        
+        async function testQuickRegister() {
+            const resultDiv = document.getElementById('result');
+            
+            // Fill form with Arya's data
+            document.getElementById('nama_lengkap').value = 'Muhammad Arya Fatthurahman';
+            document.getElementById('email').value = 'aryafatthurahman4@gmail.com';
+            document.getElementById('phone').value = '';
+            document.getElementById('password').value = 'arya123';
+            document.getElementById('password_confirmation').value = 'arya123';
+            
+            resultDiv.className = 'info';
+            resultDiv.textContent = 'Testing quick registration for Arya...';
+            
+            // Auto-submit
+            await registerUser();
+        }
+        
+        async function testLogin(email, password) {
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                const response = await fetch('http://localhost:8081/test_login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === true) {
+                    resultDiv.className = 'success';
+                    resultDiv.textContent = resultDiv.textContent + `\n\n✅ Auto-Login Successful!\n` +
+                        `Welcome back, ${data.data.nama_lengkap}!`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = resultDiv.textContent + `\n\n❌ Auto-login failed: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

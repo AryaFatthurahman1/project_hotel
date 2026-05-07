@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Login Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            cursor: pointer;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <h1>Login Test</h1>
+    <p>Use: arya / 123</p>
+    
+    <input type="text" id="email" value="arya" placeholder="Email/Username">
+    <input type="password" id="password" value="123" placeholder="Password">
+    <button onclick="testLogin()">Login</button>
+    
+    <div id="result"></div>
+
+    <script>
+        async function testLogin() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.textContent = 'Logging in...';
+            resultDiv.className = '';
+            
+            try {
+                const response = await fetch('http://localhost:8081/test_login.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `email=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === true) {
+                    resultDiv.className = 'success';
+                    resultDiv.textContent = `✓ Login Successful!\n\nUser: ${data.data.nama_lengkap}\nEmail: ${data.data.email}\nRole: ${data.data.role}\nToken: ${data.data.token}`;
+                } else {
+                    resultDiv.className = 'error';
+                    resultDiv.textContent = `✗ Login Failed: ${data.message}`;
+                }
+            } catch (error) {
+                resultDiv.className = 'error';
+                resultDiv.textContent = `✗ Error: ${error.message}`;
+            }
+        }
+        
+        // Auto-test on page load
+        window.onload = function() {
+            testLogin();
+        };
+    </script>
+</body>
+</html>

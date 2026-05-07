@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Server Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .status-card {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .status-online {
+            border-left: 4px solid #28a745;
+        }
+        .status-offline {
+            border-left: 4px solid #dc3545;
+        }
+        .status-pending {
+            border-left: 4px solid #ffc107;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        .status-text {
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .online { color: #28a745; }
+        .offline { color: #dc3545; }
+        .pending { color: #ffc107; }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🏨 Luxury Hotel - Server Status</h1>
+    
+    <div class="status-card status-pending" id="web-server">
+        <h2>🌐 Web Server (Port 8080)</h2>
+        <p class="status-text pending">Checking...</p>
+        <p>Serves HTML files and static assets</p>
+    </div>
+    
+    <div class="status-card status-pending" id="api-server">
+        <h2>🔌 API Server (Port 8081)</h2>
+        <p class="status-text pending">Checking...</p>
+        <p>Handles login and registration requests</p>
+    </div>
+    
+    <div style="margin-top: 30px;">
+        <button onclick="checkServers()">🔄 Check Status</button>
+        <button onclick="testLogin()">🧪 Test Login</button>
+        <button onclick="openLoginTest()">📋 Open Login Test</button>
+    </div>
+    
+    <div id="results"></div>
+
+    <script>
+        async function checkServers() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3>Checking servers...</h3>';
+            
+            // Check Web Server
+            const webServer = document.getElementById('web-server');
+            const webStatus = webServer.querySelector('.status-text');
+            
+            try {
+                const response = await fetch('http://127.0.0.1:8080/simple_login_test.html');
+                if (response.ok) {
+                    webServer.className = 'status-card status-online';
+                    webStatus.className = 'status-text online';
+                    webStatus.textContent = 'Online';
+                } else {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                webServer.className = 'status-card status-offline';
+                webStatus.className = 'status-text offline';
+                webStatus.textContent = 'Offline';
+            }
+            
+            // Check API Server
+            const apiServer = document.getElementById('api-server');
+            const apiStatus = apiServer.querySelector('.status-text');
+            
+            try {
+                const response = await fetch('http://localhost:8081/test_login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'email=arya&password=123'
+                });
+                const data = await response.json();
+                if (data.status === true) {
+                    apiServer.className = 'status-card status-online';
+                    apiStatus.className = 'status-text online';
+                    apiStatus.textContent = 'Online - Login Working';
+                } else {
+                    apiServer.className = 'status-card status-offline';
+                    apiStatus.className = 'status-text offline';
+                    apiStatus.textContent = 'Error: ' + data.message;
+                }
+            } catch (error) {
+                apiServer.className = 'status-card status-offline';
+                apiStatus.className = 'status-text offline';
+                apiStatus.textContent = 'Offline';
+            }
+            
+            resultsDiv.innerHTML = '<h3>✅ Status check completed!</h3>';
+        }
+        
+        async function testLogin() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<h3>Testing login...</h3>';
+            
+            try {
+                const response = await fetch('http://localhost:8081/test_login.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: 'email=arya&password=123'
+                });
+                const data = await response.json();
+                
+                if (data.status === true) {
+                    resultsDiv.innerHTML = `
+                        <h3>✅ Login Successful!</h3>
+                        <div style="background: #d4edda; padding: 15px; border-radius: 4px;">
+                            <p><strong>User:</strong> ${data.data.nama_lengkap}</p>
+                            <p><strong>Email:</strong> ${data.data.email}</p>
+                            <p><strong>Role:</strong> ${data.data.role}</p>
+                            <p><strong>Token:</strong> ${data.data.token}</p>
+                        </div>
+                    `;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <h3>❌ Login Failed</h3>
+                        <div style="background: #f8d7da; padding: 15px; border-radius: 4px;">
+                            <p>${data.message}</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                resultsDiv.innerHTML = `
+                    <h3>❌ Error</h3>
+                    <div style="background: #f8d7da; padding: 15px; border-radius: 4px;">
+                        <p>${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function openLoginTest() {
+            window.open('http://127.0.0.1:8080/simple_login_test.html', '_blank');
+        }
+        
+        // Auto-check on page load
+        window.onload = function() {
+            checkServers();
+        };
+    </script>
+</body>
+</html>
